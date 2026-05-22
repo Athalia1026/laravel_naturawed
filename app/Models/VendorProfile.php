@@ -8,21 +8,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class VendorProfile extends Model
 {
-    use HasFactory;
-
-    /**
-     * Nama tabel yang terkait dengan model.
-     * (Opsional, karena Laravel otomatis mendeteksi bentuk jamak dari nama model)
-     *
-     * @var string
-     */
-    protected $table = 'vendor_profiles';
-
-    /**
-     * Atribut yang dapat diisi melalui mass assignment.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
         'user_id',
         'business_name',

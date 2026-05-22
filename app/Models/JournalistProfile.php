@@ -6,5 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class JournalistProfile extends Model
 {
-    //
+    protected $fillable = [
+        'user_id',
+        'full_name',
+    ];
 }
