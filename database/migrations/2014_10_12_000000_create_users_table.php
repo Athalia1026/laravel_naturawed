@@ -9,26 +9,35 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-  public function up(): void
+    public function up(): void
     {
+        // 1. TABEL USERS (Modifikasi NaturaWed)
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            
-            // Kolom nama dibuat nullable sebagai jembatan transisi ke tabel profil masing-masing
-            $table->string('name')->nullable(); 
-            
+            $table->string('name')->nullable();
             $table->string('email', 100)->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-            
-            // Enum Role sesuai dengan blueprint spesifikasi NaturaWed
             $table->enum('role', ['customer', 'vendor', 'journalist']);
-            
-            // Token wajib untuk fitur 'Remember Me' Laravel Breeze
-            $table->rememberToken(); 
-            
-            // Otomatis membuat kolom 'created_at' dan 'updated_at'
-            $table->timestamps(); 
+            $table->rememberToken();
+            $table->timestamps();
+        });
+
+        // 2. TABEL PASSWORD RESET (Bawaan Laravel)
+        Schema::create('password_reset_tokens', function (Blueprint $table) {
+            $table->string('email')->primary();
+            $table->string('token');
+            $table->timestamp('created_at')->nullable();
+        });
+
+        // 3. TABEL SESSIONS (Bawaan Laravel - Solusi Error Anda)
+        Schema::create('sessions', function (Blueprint $table) {
+            $table->string('id')->primary();
+            $table->foreignId('user_id')->nullable()->index();
+            $table->string('ip_address', 45)->nullable();
+            $table->text('user_agent')->nullable();
+            $table->longText('payload');
+            $table->integer('last_activity')->index();
         });
     }
 
@@ -38,5 +47,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('users');
+        Schema::dropIfExists('password_reset_tokens');
+        Schema::dropIfExists('sessions');
     }
 };
