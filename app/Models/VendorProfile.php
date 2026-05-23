@@ -24,4 +24,8 @@ class VendorProfile extends Model
     {
         return $this->belongsTo(User::class, 'user_id');
     }
+    public function packages()
+    {
+        return $this->hasMany(Package::class, 'vendor_id');
+    }
 }
