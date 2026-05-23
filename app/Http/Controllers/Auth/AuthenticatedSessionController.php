@@ -28,11 +28,13 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
+
+
         // REDIRECT BERDASARKAN ROLE (Custom NaturaWed)
         $role = $request->user()->role;
         
         if ($role === 'vendor') {
-            return redirect()->intended('/dashboard-vendor'); // Sesuaikan URL rute Anda
+            return redirect()->intended('/vendor/dashboard'); // Sesuaikan URL rute Anda
         } elseif ($role === 'journalist') {
             return redirect()->intended('/journalist-dashboard');
         }
