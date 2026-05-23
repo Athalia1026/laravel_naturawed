@@ -6,6 +6,7 @@ use App\Http\Controllers\Vendor\VendorDashboardController;
 use App\Http\Controllers\Vendor\VendorPortfolioController;
 use App\Http\Controllers\Vendor\VendorProfileController;
 use App\Http\Controllers\Vendor\VendorPackageController;
+use App\Http\Controllers\Journalist\ArticleController; 
 
 
 Route::get('/', function () {
@@ -40,6 +41,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/vendor/packages/{id}/edit', [VendorPackageController::class, 'edit'])->name('vendor.packages.edit');
     Route::post('/vendor/packages/update', [VendorPackageController::class, 'update'])->name('vendor.packages.update');
     Route::delete('/vendor/packages/{id}', [VendorPackageController::class, 'delete'])->name('vendor.packages.delete');
+
+///JOURNALIST
+    Route::get('/journalist/dashboard', [ArticleController::class, 'dashboard'])
+    ->name('journalist.dashboard');
+
+    Route::get('/journalist/article/create', [ArticleController::class, 'create'])
+    ->name('journalist.article.create');
+
+    Route::post('/journalist/article/store', [ArticleController::class, 'store']) // Nanti kamu bikin fungsi store-nya ya!
+    ->name('journalist.article.store');  
 });
 
 Route::get('/packages/{id}', [VendorPackageController::class, 'show'])->name('packages.show');
