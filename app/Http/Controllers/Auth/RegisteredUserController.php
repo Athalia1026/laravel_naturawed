@@ -21,9 +21,13 @@ class RegisteredUserController extends Controller
     /**
      * Display the registration view.
      */
-    public function create(): View
+    public function create(Request $request)
     {
-        return view('auth.register');
+        // Tangkap role dari URL, jika tidak ada default ke 'customer' (couple)
+    $role = $request->query('role', 'customer');
+
+    // Kirimkan variabel $role ke dalam file blade register
+    return view('auth.register', compact('role'));
     }
 
     /**
