@@ -12,6 +12,9 @@ Route::middleware('guest')->group(function () {
     // Rute untuk Sign Up (Register)
     Route::get('register', [RegisteredUserController::class, 'create'])->name('register');
     Route::post('register', [RegisteredUserController::class, 'store']);
+    Route::get('register-vendor', [RegisteredUserController::class, 'createVendor'])
+                ->name('register.vendor');
+    Route::post('register-vendor', [RegisteredUserController::class, 'storeVendor']);
 
     // Rute untuk Sign In (Login)
     Route::get('login', [AuthenticatedSessionController::class, 'create'])->name('login');
