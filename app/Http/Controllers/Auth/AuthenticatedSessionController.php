@@ -36,7 +36,7 @@ class AuthenticatedSessionController extends Controller
         if ($role === 'vendor') {
             return redirect('/vendor/dashboard'); // Sesuaikan URL rute Anda
         } elseif ($role === 'journalist') {
-            return redirect('/journalist-dashboard');
+            return redirect('/journalist/dashboard');
         }
 
         // Default Customer
