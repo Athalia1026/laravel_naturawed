@@ -6,12 +6,18 @@ use App\Http\Controllers\Vendor\VendorDashboardController;
 use App\Http\Controllers\Vendor\VendorPortfolioController;
 use App\Http\Controllers\Vendor\VendorProfileController;
 use App\Http\Controllers\Vendor\VendorPackageController;
-use App\Http\Controllers\Journalist\ArticleController; 
+use App\Http\Controllers\Journalist\ArticleController;
+use App\Http\Controllers\Customer\HomeController;
+use App\Http\Controllers\Customer\VendorController as CustomerVendorController;
+use App\Http\Controllers\Customer\BookingController as CustomerBookingController;
+use App\Http\Controllers\Customer\PaymentController as CustomerPaymentController;
 
+Route::get('/', [HomeController::class, 'index'])->name('home');
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/vendors', [CustomerVendorController::class, 'index'])->name('customer.vendors');
+
+Route::get('/packages/{id}', [VendorPackageController::class, 'show'])->name('packages.show');
+
 
 require __DIR__ . '/auth.php';
 
@@ -50,7 +56,20 @@ Route::middleware(['auth', 'verified'])->group(function () {
     ->name('journalist.article.create');
 
     Route::post('/journalist/article/store', [ArticleController::class, 'store']) // Nanti kamu bikin fungsi store-nya ya!
-    ->name('journalist.article.store');  
+    ->name('journalist.article.store');
+
+    Route::get('/checkout/{id}', [CustomerBookingController::class, 'checkout'])->name('customer.checkout');
+    
+    // 2. RUTE POST: Untuk memproses simpan data pesanan (Sudah kita buat sebelumnya)
+    Route::post('/bookings', [CustomerBookingController::class, 'store'])->name('customer.bookings.store');
+
+    // Tampilan Instruksi Pembayaran Paket
+    Route::get('/payment-instruction', [CustomerPaymentController::class, 'showPayment'])->name('customer.payment.show');
+    
+    // Endpoint AJAX POST Penampung Unggah Bukti Transfer
+    Route::post('/payment-submit', [CustomerPaymentController::class, 'store'])->name('customer.payment.submit');
+
+    Route::get('/history', [CustomerBookingController::class, 'history'])->name('customer.bookings.history');
 });
 
 Route::get('/packages/{id}', [VendorPackageController::class, 'show'])->name('packages.show');
