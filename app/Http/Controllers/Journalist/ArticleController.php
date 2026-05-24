@@ -11,7 +11,7 @@ class ArticleController extends Controller
 {
     // Untuk Jurnalis
     public function dashboard() {
-        $myArticles = Article::where('user_id', Auth::id())->get();
+        $myArticles = Article::where('journalist_id', Auth::id())->get();
         return view('journalist.dashboard', compact('myArticles'));
     }
 
