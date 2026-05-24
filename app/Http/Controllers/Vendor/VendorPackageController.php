@@ -184,7 +184,7 @@ class VendorPackageController extends Controller
             return abort(404, 'Maaf, paket pernikahan tidak ditemukan.');
         }
 
-        return view('public.package_detail', compact('package'));
+        return view('customer.package_detail', compact('package'));
     }
 
     /**
