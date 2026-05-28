@@ -152,7 +152,7 @@
                         </div>
                     </div>
 
-                    <div class="bg-white p-10 rounded-[2.5rem] border border-gray-100 shadow-sm">
+                  <div class="bg-white p-10 rounded-[2.5rem] border border-gray-100 shadow-sm">
                         <div class="flex items-center gap-4 mb-8">
                             <div class="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center text-gray-400">
                                 <i data-lucide="image" class="w-4 h-4"></i>
@@ -160,46 +160,78 @@
                             <h3 class="text-2xl font-serif text-gray-900">Media Cover</h3>
                         </div>
 
-                        <label for="coverUpload" class="block border-2 border-dashed border-gray-200 rounded-3xl p-8 flex flex-col items-center justify-center text-center cursor-pointer hover:border-[#2d3e2d]/20 hover:bg-gray-50 transition-all group">
+                        <label for="coverUpload" class="relative block border-2 border-dashed border-gray-200 rounded-3xl p-8 flex flex-col items-center justify-center text-center cursor-pointer hover:border-[#2d3e2d]/20 hover:bg-gray-50 transition-all group overflow-hidden min-h-[250px]">
                             <input type="file" id="coverUpload" name="main_image" accept="image/*" class="hidden">
-                            <div class="w-12 h-12 rounded-xl bg-white border border-gray-100 flex items-center justify-center text-[#2d3e2d] mb-4 shadow-sm group-hover:scale-110 transition-transform">
-                                <i data-lucide="upload" class="w-5 h-5"></i>
+
+                            <div id="uploadPlaceholder" class="flex flex-col items-center z-10 {{ isset($package) && $package->main_image ? 'hidden' : '' }}">
+                                <div class="w-12 h-12 rounded-xl bg-white border border-gray-100 flex items-center justify-center text-[#2d3e2d] mb-4 shadow-sm group-hover:scale-110 transition-transform">
+                                    <i data-lucide="upload" class="w-5 h-5"></i>
+                                </div>
+                                <p class="text-sm font-bold text-gray-900 mb-1">
+                                    Upload Image
+                                </p>
+                                <p class="text-[10px] text-gray-400 uppercase tracking-widest leading-relaxed">High-res JPEG or PNG<br/>(Max 2MB)</p>
                             </div>
-                            <p class="text-sm font-bold text-gray-900 mb-1" id="fileNameDisplay">
-                                {{ isset($package) && $package->main_image ? 'Change Current Image' : 'Upload Image' }}
-                            </p>
-                            <p class="text-[10px] text-gray-400 uppercase tracking-widest leading-relaxed">High-res JPEG or PNG<br/>(Max 2MB)</p>
+
+                            <img id="imagePreview" 
+                                src="{{ isset($package) && $package->main_image ? asset($package->main_image) : '' }}" 
+                                class="absolute inset-0 w-full h-full object-cover z-0 {{ isset($package) && $package->main_image ? '' : 'hidden' }}" 
+                                alt="Preview">
+
+                            <div id="hoverOverlay" class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-20 {{ isset($package) && $package->main_image ? '' : 'hidden' }}">
+                                <span class="text-white font-bold text-sm tracking-widest uppercase"><i data-lucide="edit-2" class="w-4 h-4 inline mb-1 mr-1"></i> Change Image</span>
+                            </div>
                         </label>
-                        <x-input-error :messages="$errors->get('main_image')" class="mt-1" />
-                        
-                        @if(isset($package) && $package->main_image)
-                            <div class="mt-4 rounded-xl overflow-hidden h-20 border border-gray-100 shadow-sm">
-                                <img src="{{ $package->main_image }}" class="w-full h-full object-cover" alt="Current Cover">
-                            </div>
-                        @endif
+                        <x-input-error :messages="$errors->get('main_image')" class="mt-2" />
                     </div>
                 </div>
             </div>
         </form>
     </main>
 
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            lucide.createIcons();
-            
-            const coverUpload = document.getElementById('coverUpload');
-            const fileNameDisplay = document.getElementById('fileNameDisplay');
+   <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        lucide.createIcons();
+        
+        const coverUpload = document.getElementById('coverUpload');
+        const imagePreview = document.getElementById('imagePreview');
+        const uploadPlaceholder = document.getElementById('uploadPlaceholder');
+        const hoverOverlay = document.getElementById('hoverOverlay');
 
-            if (coverUpload && fileNameDisplay) {
-                coverUpload.addEventListener('change', function(e) {
-                    if (e.target.files.length > 0) {
-                        const fileName = e.target.files.name;
-                        fileNameDisplay.textContent = fileName.length > 25 ? fileName.substring(0, 25) + '...' : fileName;
-                        fileNameDisplay.classList.add('text-[#2d4a22]');
+        if (coverUpload) {
+            coverUpload.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                
+                if (file) {
+                    // Cek ukuran file (Maksimal 2MB = 2 * 1024 * 1024 bytes)
+                    if (file.size > 2097152) {
+                        alert('Ukuran gambar terlalu besar! Maksimal 2MB.');
+                        this.value = ''; // Reset input
+                        return;
                     }
-                });
-            }
-        });
-    </script>
+
+                    // Logika Pratinjau Menggunakan FileReader
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        // Masukkan gambar ke tag img
+                        imagePreview.src = event.target.result;
+                        
+                        // Sembunyikan ikon upload, tampilkan gambar & overlay ganti gambar
+                        imagePreview.classList.remove('hidden');
+                        hoverOverlay.classList.remove('hidden');
+                        uploadPlaceholder.classList.add('hidden');
+                    }
+                    reader.readAsDataURL(file);
+                } else {
+                    // Jika user batal memilih gambar, kembalikan ke awal
+                    imagePreview.src = '';
+                    imagePreview.classList.add('hidden');
+                    hoverOverlay.classList.add('hidden');
+                    uploadPlaceholder.classList.remove('hidden');
+                }
+            });
+        }
+    });
+</script>
 </body>
 </html>
