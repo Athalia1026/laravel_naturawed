@@ -6,6 +6,7 @@ use App\Http\Controllers\Vendor\VendorDashboardController;
 use App\Http\Controllers\Vendor\VendorPortfolioController;
 use App\Http\Controllers\Vendor\VendorProfileController;
 use App\Http\Controllers\Vendor\VendorPackageController;
+use App\Http\Controllers\Vendor\VendorBookingController;
 use App\Http\Controllers\Journalist\ArticleController;
 use App\Http\Controllers\Customer\HomeController;
 use App\Http\Controllers\Customer\VendorController as CustomerVendorController;
@@ -47,6 +48,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/vendor/packages/{id}/edit', [VendorPackageController::class, 'edit'])->name('vendor.packages.edit');
     Route::post('/vendor/packages/update', [VendorPackageController::class, 'update'])->name('vendor.packages.update');
     Route::delete('/vendor/packages/{id}', [VendorPackageController::class, 'delete'])->name('vendor.packages.delete');
+
+    // Vendor Booking Approval Routes
+    Route::post('/vendor/bookings/{id}/approve', [VendorBookingController::class, 'approve'])->name('vendor.bookings.approve');
+    Route::post('/vendor/bookings/{id}/reject', [VendorBookingController::class, 'reject'])->name('vendor.bookings.reject');
 
 ///JOURNALIST
     Route::get('/journalist/dashboard', [ArticleController::class, 'dashboard'])

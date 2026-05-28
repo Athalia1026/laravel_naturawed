@@ -22,6 +22,7 @@ class BookingController extends Controller
             'phone' => 'required|string|max:20',
             'event_date' => 'required|date',
             'event_location' => 'required|string|max:255',
+            'estimated_guests' => 'required|integer|min:10',
             'notes' => 'nullable|string',
         ]);
 
@@ -55,9 +56,11 @@ class BookingController extends Controller
             'package_id' => $request->package_id,
             'event_date' => $request->event_date,
             'event_location' => $request->event_location,
+            'estimated_guests' => $request->estimated_guests,
             'notes' => $request->notes,
             'total_price' => $request->total_price,
-            'status' => 'pending',
+            'booking_status' => 'pending_review',
+            'payment_status' => 'unpaid',
             'created_at' => now(),
             'updated_at' => now(),
         ]);
@@ -72,8 +75,8 @@ class BookingController extends Controller
                 'updated_at' => now(),
             ]);
 
-            // Alihkan halaman menuju instruksi pembayaran
-            return redirect()->route('customer.payment.show', ['booking_id' => $bookingId]);
+            // Redirect ke halaman history dengan pesan sukses
+            return redirect()->route('customer.bookings.history')->with('success', 'Booking request submitted! Waiting for vendor approval.');
         }
 
         return back()->with('error', 'Gagal memproses pemesanan Anda.');
@@ -98,42 +101,42 @@ class BookingController extends Controller
 
     public function history(Request $request)
     {
-        $activeTab = $request->query('tab', 'All');
         $userId = Auth::id();
+        $activeTab = $request->query('tab', 'All');
 
-        // 1. Inisialisasi Base Query Builder dengan relasi JOIN tabel packages & payments
-        $query = DB::table('bookings as b')
-            ->join('packages as p', 'b.package_id', '=', 'p.id')
-            ->leftJoin('payments as pay', 'b.id', '=', 'pay.booking_id')
-            ->where('b.customer_id', function ($subquery) use ($userId) {
-                $subquery->select('id')
-                    ->from('customer_profiles')
-                    ->where('user_id', $userId)
-                    ->limit(1);
-            })
-            ->select(
-                'b.*',
-                'p.package_name',
-                'p.main_image',
-                'p.price as package_price',
-                'pay.status as payment_status',
-                'pay.amount as total_paid'
-            );
-
-        // 2. Logika Filtrasi Klausa WHERE Berdasarkan Tab Aktif
-        if ($activeTab === 'Ongoing') {
-            $query->where(function ($q) {
-                $q->whereIn('pay.status', ['pending_verification', 'unpaid'])
-                    ->orWhereNull('pay.status');
-            });
-        } elseif ($activeTab === 'Completed') {
-            $query->where('pay.status', '=', 'success');
-        } elseif ($activeTab === 'Canceled') {
-            $query->where('b.status', '=', 'canceled');
+        // Cari ID customer berdasarkan user login
+        $customerProfile = DB::table('customer_profiles')->where('user_id', $userId)->first();
+        if (!$customerProfile) {
+            return redirect()->route('dashboard')->with('error', 'Please complete your profile first.');
         }
 
-        // 3. Eksekusi Pengambilan Data Urut Berdasarkan Tanggal Dibuat Terbaru
-        $historyItems = $query->orderBy('b.created_at', 'desc')->get();
+        // Query Dasar
+        $query = DB::table('bookings as b')
+            ->join('packages as p', 'b.package_id', '=', 'p.id')
+            ->where('b.customer_id', $customerProfile->id)
+            ->select('b.*', 'p.package_name', 'p.main_image', 'p.price as package_price')
+            ->orderBy('b.created_at', 'desc');
+
+        // Logika Filter Tab yang Diperbarui untuk Inquiry-Based Booking
+        if ($activeTab === 'Ongoing') {
+            // Ongoing: Pending Review atau (Approved tapi belum sukses bayar)
+            $query->where(function ($q) {
+                $q->where('b.booking_status', 'pending_review')
+                  ->orWhere(function ($q2) {
+                      $q2->where('b.booking_status', 'approved')
+                         ->where('b.payment_status', '!=', 'success');
+                  });
+            });
+        } elseif ($activeTab === 'Completed') {
+            // Completed: Sudah Approved DAN Pembayaran Sukses
+            $query->where('b.booking_status', 'approved')
+                  ->where('b.payment_status', 'success');
+        } elseif ($activeTab === 'Canceled') {
+            // Canceled: Ditolak oleh Vendor
+            $query->where('b.booking_status', 'rejected');
+        }
+
+        $historyItems = $query->get();
 
         return view('customer.history', compact('historyItems', 'activeTab'));
     }

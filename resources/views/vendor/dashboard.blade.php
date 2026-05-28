@@ -110,8 +110,10 @@
                                     <tr class="bg-[#f8f9fa] text-[10px] font-bold tracking-widest text-gray-400 uppercase">
                                         <th class="px-8 py-4">Client</th>
                                         <th class="px-8 py-4">Package</th>
+                                        <th class="px-8 py-4">Guests</th>
                                         <th class="px-8 py-4">Status</th>
                                         <th class="px-8 py-4">Amount</th>
+                                        <th class="px-8 py-4">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-50">
@@ -119,17 +121,35 @@
                                         <tr class="hover:bg-gray-50 transition-colors">
                                             <td class="px-8 py-5 font-semibold text-sm">{{ $order->client_name }}</td>
                                             <td class="px-8 py-5 text-sm text-gray-500">{{ $order->package_name }}</td>
+                                            <td class="px-8 py-5 text-sm font-semibold text-[#2d3e2d]">{{ $order->estimated_guests ?? 'N/A' }}</td>
                                             <td class="px-8 py-5">
-                                                <span class="px-3 py-1 rounded-full text-[9px] font-bold tracking-wider 
-                                                    {{ $order->status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800' }}">
-                                                    {{ strtoupper($order->status) }}
+                                                <span class="px-3 py-1 rounded-full text-[9px] font-bold tracking-wider {{ $order->statusColor }}">
+                                                    {{ strtoupper($order->statusLabel) }}
                                                 </span>
                                             </td>
                                             <td class="px-8 py-5 font-semibold text-sm">Rp {{ number_format($order->amount, 0, ',', '.') }}</td>
+                                            <td class="px-8 py-5">
+                                                @if($order->booking_status === 'pending_review')
+                                                    <div class="flex gap-2">
+                                                        <form action="{{ route('vendor.bookings.approve', $order->id) }}" method="POST" style="display:inline;">
+                                                            @csrf
+                                                            <button type="submit" class="px-3 py-1.5 bg-[#2d3e2d] text-white text-[10px] font-bold rounded-lg hover:opacity-90 transition-opacity">Approve</button>
+                                                        </form>
+                                                        <form action="{{ route('vendor.bookings.reject', $order->id) }}" method="POST" style="display:inline;">
+                                                            @csrf
+                                                            <button type="submit" class="px-3 py-1.5 bg-red-500 text-white text-[10px] font-bold rounded-lg hover:opacity-90 transition-opacity">Reject</button>
+                                                        </form>
+                                                    </div>
+                                                @elseif($order->booking_status === 'approved')
+                                                    <span class="text-[10px] text-gray-500 italic">—</span>
+                                                @else
+                                                    <span class="text-[10px] text-gray-500 italic">—</span>
+                                                @endif
+                                            </td>
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="4" class="px-8 py-6 text-center text-sm text-gray-400 italic">No recent bookings found.</td>
+                                            <td colspan="6" class="px-8 py-6 text-center text-sm text-gray-400 italic">No recent bookings found.</td>
                                         </tr>
                                     @endforelse
                                 </tbody>

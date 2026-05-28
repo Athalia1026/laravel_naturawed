@@ -58,10 +58,10 @@
                         <h2 class="text-2xl font-serif text-[#2d4a22]">Wedding Details</h2>
                     </div>
                     <div class="bg-zinc-100/50 rounded-[32px] p-10 space-y-8 border border-zinc-100">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                             <div class="space-y-2">
                                 <label class="text-[10px] font-bold tracking-widest text-zinc-400 uppercase">Event Date</label>
-                                <input type="date" name="event_date" required required value="{{ old('event_date') }}"
+                                <input type="date" name="event_date" required value="{{ old('event_date') }}"
                                        class="w-full bg-zinc-100 border-none rounded-2xl py-4 px-6 focus:ring-2 focus:ring-[#2d4a22]/20 text-zinc-600 outline-none">
                             </div>
                             <div class="space-y-2">
@@ -71,6 +71,16 @@
                                         <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
                                     </div>
                                     <input type="text" name="event_location" required value="{{ old('event_location') }}" placeholder="City or Venue Name" 
+                                           class="w-full bg-zinc-100 border-none rounded-2xl py-4 pl-14 pr-6 focus:ring-2 focus:ring-[#2d4a22]/20 outline-none">
+                                </div>
+                            </div>
+                            <div class="space-y-2">
+                                <label class="text-[10px] font-bold tracking-widest text-zinc-400 uppercase">Estimated Guests</label>
+                                <div class="relative">
+                                    <div class="absolute left-6 top-1/2 -translate-y-1/2 text-zinc-400">
+                                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                                    </div>
+                                    <input type="number" name="estimated_guests" required value="{{ old('estimated_guests') }}" placeholder="e.g. 100" min="10"
                                            class="w-full bg-zinc-100 border-none rounded-2xl py-4 pl-14 pr-6 focus:ring-2 focus:ring-[#2d4a22]/20 outline-none">
                                 </div>
                             </div>
@@ -120,8 +130,11 @@
                             </span>
                         </div>
                         <button type="submit" class="w-full py-6 bg-[#3a4d39] hover:bg-[#2d4a22] text-white rounded-2xl font-bold text-lg transition-all outline-none shadow-md cursor-pointer">
-                            COMPLETE PURCHASE
+                            REQUEST BOOKING
                         </button>
+                        <p class="text-[10px] text-zinc-400 text-center italic leading-relaxed">
+                            No payment is required until the vendor approves your date.
+                        </p>
                     </div>
                 </section>
             </div>

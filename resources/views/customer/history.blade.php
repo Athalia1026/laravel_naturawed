@@ -38,17 +38,22 @@
                             
                             @php
                                 $statusClass = "bg-zinc-500";
-                                $statusLabel = $item->payment_status ?? 'Unpaid';
+                                $statusLabel = "Unknown";
                                 
-                                if($statusLabel == 'success') { 
-                                    $statusClass = "bg-[#2d4a22]"; 
-                                    $statusLabel = "Confirmed"; 
-                                } elseif($statusLabel == 'pending_verification') { 
-                                    $statusClass = "bg-amber-500"; 
-                                    $statusLabel = "Pending"; 
-                                } elseif($statusLabel == 'unpaid' || !$statusLabel) { 
-                                    $statusClass = "bg-red-500"; 
-                                    $statusLabel = "Unpaid"; 
+                                if($item->booking_status === 'pending_review') {
+                                    $statusClass = "bg-amber-500";
+                                    $statusLabel = "Waiting Approval";
+                                } elseif($item->booking_status === 'approved') {
+                                    if($item->payment_status === 'success') {
+                                        $statusClass = "bg-[#2d4a22]";
+                                        $statusLabel = "Confirmed";
+                                    } else {
+                                        $statusClass = "bg-[#2d4a22]";
+                                        $statusLabel = "Approved";
+                                    }
+                                } elseif($item->booking_status === 'rejected') {
+                                    $statusClass = "bg-red-500";
+                                    $statusLabel = "Rejected";
                                 }
                             @endphp
                             
@@ -81,7 +86,11 @@
                                     </p>
                                 </div>
 
-                                @if($item->payment_status != 'success' && $item->payment_status != 'pending_verification')
+                                @if($item->booking_status === 'pending_review')
+                                    <button class="border border-zinc-200 text-zinc-400 bg-zinc-50 px-8 py-4 rounded-xl font-semibold cursor-not-allowed outline-none" disabled>
+                                        Awaiting Vendor Approval
+                                    </button>
+                                @elseif($item->booking_status === 'approved' && $item->payment_status !== 'success')
                                     <a href="{{ route('customer.payment.show', ['booking_id' => $item->id]) }}" 
                                        class="bg-[#2d4a22] hover:bg-[#1e3317] text-white px-8 py-4 rounded-xl font-semibold transition-colors decoration-none shadow-md cursor-pointer">
                                         Pay Now →

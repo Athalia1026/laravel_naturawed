@@ -66,22 +66,27 @@ class PaymentController extends Controller
                 return response()->json(['status' => 'error', 'message' => 'Gagal memproses unggah dokumen.'], 400);
             }
 
-            // 3. Update Status Data ke Tabel Payments
+         
             $updated = DB::table('payments')
                 ->where('booking_id', $bookingId)
                 ->update([
                     'payment_proof' => $imagePathDb,
-                    'status' => 'pending_verification',
+                 
                     'updated_at' => now()
                 ]);
 
             if ($updated) {
+                DB::table('bookings')
+                    ->where('id', $bookingId)
+                    ->update([
+                        'payment_status' => 'success'
+                    ]);
+
                 return response()->json([
                     'status' => 'success',
                     'message' => 'Payment proof submitted successfully.'
                 ]);
             }
-
             return response()->json(['status' => 'error', 'message' => 'Gagal memperbarui status basis data.'], 500);
 
         } catch (\Exception $e) {

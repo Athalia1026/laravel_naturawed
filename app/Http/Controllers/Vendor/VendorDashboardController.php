@@ -10,9 +10,9 @@ use App\Models\Package;
 
 class VendorDashboardController extends Controller
 {
-    public function index()
+  public function index()
     {
-        $userId = Auth::id(); // Menggantikan $_SESSION['user_id']
+        $userId = Auth::id(); 
 
         // A. Ambil ID Profile Vendor berdasarkan user_id yang sedang login
         $vendorProfile = DB::table('vendor_profiles')
@@ -21,39 +21,53 @@ class VendorDashboardController extends Controller
 
         $vendorId = $vendorProfile ? $vendorProfile->id : 0;
 
+        // B. Konversi Fungsi: getRecentOrdersForVendor()
         // B. KOnversi Fungsi: getRecentOrdersForVendor()
-        // Menggabungkan tabel bookings, packages, dan customer_profiles secara dinamis
-        $recentOrders = DB::table('bookings', 'b')
+        $recentOrders = DB::table('bookings as b') 
             ->join('packages as p', 'b.package_id', '=', 'p.id')
             ->join('customer_profiles as cp', 'b.customer_id', '=', 'cp.id')
             ->where('p.vendor_id', $vendorId)
-            ->select('b.id', 'b.status', 'b.total_price as amount', 'p.package_name as package', 'cp.full_name as client')
+            ->select(
+                'b.id', 
+                'b.booking_status', 
+                'b.payment_status', 
+                'b.estimated_guests',
+                'b.total_price as amount', 
+                'p.package_name as package_name', 
+                'cp.full_name as client_name'     
+            )
             ->orderBy('b.created_at', 'desc')
             ->take(5)
             ->get()
-            ->map(function ($order) {
-                // Konversi Logika Switch-Case Warna Badge Native ke Properti Objek Laravel
-                switch (strtolower($order->status)) {
-                    case 'confirmed':
-                        $order->statusColor = 'bg-[#e1f5e1] text-[#2d3e2d]';
-                        break;
-                    case 'pending':
-                        $order->statusColor = 'bg-[#fff4e5] text-[#b7791f]';
-                        break;
-                    case 'completed':
-                        $order->statusColor = 'bg-[#e3f2fd] text-[#1976d2]';
-                        break;
-                    case 'cancelled':
-                        $order->statusColor = 'bg-[#ffebee] text-[#c62828]';
-                        break;
-                    default:
-                        $order->statusColor = 'bg-gray-100 text-gray-600';
+          ->map(function ($order) {
+                // Logika Cerdas: Membaca Booking Status DAN Payment Status
+                if ($order->booking_status === 'pending_review') {
+                    $order->statusColor = 'bg-[#fff4e5] text-[#b7791f]'; // Kuning
+                    $order->statusLabel = 'Pending Review';
+                } 
+                elseif ($order->booking_status === 'rejected') {
+                    $order->statusColor = 'bg-[#ffebee] text-[#c62828]'; // Merah
+                    $order->statusLabel = 'Rejected';
+                } 
+                elseif ($order->booking_status === 'approved') {
+                    // Jika sudah di-approve, kita cek apakah pembayarannya sudah sukses
+                    if ($order->payment_status === 'success') {
+                        $order->statusColor = 'bg-[#2d4a22] text-white'; // Hijau Gelap (Premium)
+                        $order->statusLabel = 'Confirmed';
+                    } else {
+                        $order->statusColor = 'bg-[#e1f5e1] text-[#2d3e2d]'; // Hijau Muda (Belum bayar)
+                        $order->statusLabel = 'Approved';
+                    }
+                } 
+                else {
+                    $order->statusColor = 'bg-gray-100 text-gray-600';
+                    $order->statusLabel = 'Unknown';
                 }
+                
                 return $order;
             });
-
         // C. Konversi Fungsi: getTotalOrdersForVendor()
-        $totalOrdersCount = DB::table('bookings', 'b')
+        $totalOrdersCount = DB::table('bookings as b') // PERBAIKAN: Gunakan 'as b'
             ->join('packages as p', 'b.package_id', '=', 'p.id')
             ->where('p.vendor_id', $vendorId)
             ->count();
@@ -65,13 +79,13 @@ class VendorDashboardController extends Controller
             ->count();
 
         // E. Hitung Otomatis Pesanan Pending Baru
-        $newInquiriesCount = DB::table('bookings', 'b')
+        $newInquiriesCount = DB::table('bookings as b') // PERBAIKAN: Gunakan 'as b'
             ->join('packages as p', 'b.package_id', '=', 'p.id')
             ->where('p.vendor_id', $vendorId)
-            ->where('b.status', 'pending')
+            ->where('b.booking_status', 'pending_review') // PERBAIKAN: Gunakan kolom dan value baru
             ->count();
 
-        // Lempar data ke file views kustom vendor dashboard Anda
+        // Lempar data ke file views
         return view('vendor.dashboard', compact(
             'recentOrders',
             'totalOrdersCount',
