@@ -75,6 +75,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/payment-submit', [CustomerPaymentController::class, 'store'])->name('customer.payment.submit');
 
     Route::get('/history', [CustomerBookingController::class, 'history'])->name('customer.bookings.history');
+    
+    // Booking Detail Route
+    Route::get('/bookings/{id}', [CustomerBookingController::class, 'show'])->name('customer.bookings.show');
 });
 
 Route::get('/packages/{id}', [VendorPackageController::class, 'show'])->name('packages.show');

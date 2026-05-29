@@ -96,9 +96,10 @@
                                         Pay Now →
                                     </a>
                                 @else
-                                    <button class="border border-zinc-200 text-zinc-900 bg-white px-8 py-4 rounded-xl font-semibold hover:bg-zinc-50 transition-colors cursor-default outline-none">
+                                    <a href="{{ route('customer.bookings.show', $item->id) }}" 
+                                       class="border border-zinc-200 text-zinc-900 bg-white px-8 py-4 rounded-xl font-semibold hover:bg-zinc-50 transition-colors decoration-none">
                                         View Details
-                                    </button>
+                                    </a>
                                 @endif
                             </div>
                         </div>

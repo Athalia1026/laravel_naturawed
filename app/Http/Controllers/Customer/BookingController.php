@@ -140,4 +140,49 @@ class BookingController extends Controller
 
         return view('customer.history', compact('historyItems', 'activeTab'));
     }
+
+    /**
+     * Menampilkan detail lengkap dari sebuah booking
+     */
+    public function show($id)
+    {
+        $userId = Auth::id();
+        
+        // Dapatkan ID profil customer dari user yang sedang login
+        $customerProfile = DB::table('customer_profiles')->where('user_id', $userId)->first();
+        if (!$customerProfile) {
+            return abort(403, 'Unauthorized access.');
+        }
+
+        // Query booking dengan join packages, vendor_profiles, dan payments
+        $booking = DB::table('bookings as b')
+            ->join('packages as p', 'b.package_id', '=', 'p.id')
+            ->join('vendor_profiles as vp', 'p.vendor_id', '=', 'vp.id')
+            ->leftJoin('payments as pay', 'b.id', '=', 'pay.booking_id')
+            ->where('b.id', $id)
+            ->select(
+                'b.*',
+                'p.package_name',
+                'p.main_image',
+                'vp.business_name',
+                'pay.payment_proof',
+                'pay.status as payment_db_status'
+            )
+            ->first();
+
+        if (!$booking) {
+            return abort(404, 'Booking not found.');
+        }
+
+        // Authorizasi: pastikan booking milik customer yang login
+        if ($booking->customer_id !== $customerProfile->id) {
+            return abort(403, 'Unauthorized access.');
+        }
+
+        // Mapping payment_status dari tabel bookings untuk konsistensi
+        $booking->payment_status = $booking->payment_status ?? 'unpaid';
+        $booking->booking_status = $booking->booking_status ?? 'pending_review';
+
+        return view('customer.booking_detail', compact('booking'));
+    }
 }
