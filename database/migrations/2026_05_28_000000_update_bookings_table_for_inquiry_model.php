@@ -46,9 +46,12 @@ return new class extends Migration
     /**
      * Reverse the migrations.
      */
+    /**
+     * Reverse the migrations.
+     */
     public function down(): void
     {
-        // Check if payment_status exists
+        // 1. Hapus kolom payment_status jika ada
         $checkPaymentStatus = DB::select("
             SELECT COLUMN_NAME 
             FROM INFORMATION_SCHEMA.COLUMNS 
@@ -59,7 +62,7 @@ return new class extends Migration
             DB::statement("ALTER TABLE bookings DROP COLUMN payment_status");
         }
 
-        // Check if booking_status exists
+        // 2. Kembalikan booking_status menjadi status dengan aman
         $checkBookingStatus = DB::select("
             SELECT COLUMN_NAME 
             FROM INFORMATION_SCHEMA.COLUMNS 
@@ -67,9 +70,18 @@ return new class extends Migration
         ");
 
         if (!empty($checkBookingStatus)) {
+            // TAHAP A: Ubah menjadi VARCHAR sementara agar aman saat transit teks
+            DB::statement("ALTER TABLE bookings CHANGE COLUMN booking_status status VARCHAR(255)");
+
+            // TAHAP B: Terjemahkan data baru kembali ke data lama
+            DB::statement("UPDATE bookings SET status = 'pending' WHERE status = 'pending_review'");
+            DB::statement("UPDATE bookings SET status = 'confirmed' WHERE status = 'approved'");
+            DB::statement("UPDATE bookings SET status = 'cancelled' WHERE status = 'rejected'");
+
+            // TAHAP C: Kunci kembali menjadi tipe ENUM lama
             DB::statement("
                 ALTER TABLE bookings 
-                CHANGE COLUMN booking_status status 
+                CHANGE COLUMN status status 
                 ENUM('pending', 'confirmed', 'completed', 'cancelled') NOT NULL DEFAULT 'pending'
             ");
         }
