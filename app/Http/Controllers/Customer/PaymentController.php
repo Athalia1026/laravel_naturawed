@@ -51,15 +51,17 @@ class PaymentController extends Controller
             $imagePathDb = null;
 
             // 2. Eksekusi Penyimpanan Gambar ke Folder Public Laragon
-            if ($request->hasFile('payment_proof')) {
+           if ($request->hasFile('payment_proof')) {
                 $file = $request->file('payment_proof');
                 
-                // Menyusun penamaan berkas kustom sesuai format asli Anda
+                // Menyusun penamaan berkas kustom
                 $newFileName = 'pay-' . $bookingId . '-' . time() . '.' . $file->getClientOriginalExtension();
                 
-                // Pindahkan langsung ke direktori public/uploads/payments/
-                $file->move(public_path('uploads/payments'), $newFileName);
-                $imagePathDb = '/uploads/payments/' . $newFileName;
+                // PERBAIKAN: Gunakan storeAs pada disk 'public' (menyimpan ke storage/app/public/uploads/payments)
+                $path = $file->storeAs('uploads/payments', $newFileName, 'public');
+                
+                // URL path disesuaikan agar bisa dibaca dari symlink storage
+                $imagePathDb = '/storage/' . $path; 
             }
 
             if (!$imagePathDb) {
