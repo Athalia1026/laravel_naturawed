@@ -31,20 +31,27 @@
                     </div>
                 @endif
 
-                <div class="mb-8 flex items-center gap-6">
-                    <div class="w-24 h-24 rounded-full bg-gray-200 overflow-hidden border-4 border-white shadow-lg relative group cursor-pointer">
-                        <img src="https://picsum.photos/seed/vendor/200/200" alt="Studio Logo" class="w-full h-full object-cover">
-                        <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                            <i data-lucide="camera" class="w-6 h-6 text-white"></i>
+                
+                <form action="{{ route('profile.update') }}" method="POST" enctype="multipart/form-data" class="bg-white rounded-[2rem] p-10 shadow-sm border border-gray-50 space-y-6">
+                    <div class="mb-8 flex items-center gap-6">
+                        <div class="relative group">
+                            <label for="profile_image_input" class="w-24 h-24 rounded-full bg-gray-200 overflow-hidden border-4 border-white shadow-lg relative group cursor-pointer flex items-center justify-center">
+                                @if ($vendorProfile && $vendorProfile->profile_image)
+                                    <img id="avatar_preview" src="{{ $vendorProfile->profile_image }}" alt="Studio Logo" class="w-full h-full object-cover">
+                                @else
+                                    <img id="avatar_preview" src="https://picsum.photos/seed/vendor/200/200" alt="Studio Logo" class="w-full h-full object-cover">
+                                @endif
+                                <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <i data-lucide="camera" class="w-6 h-6 text-white"></i>
+                                </div>
+                            </label>
+                            <input type="file" id="profile_image_input" name="profile_image" accept="image/jpeg,image/png,image/jpg,image/webp" class="hidden">
+                        </div>
+                        <div>
+                            <h3 class="text-3xl font-serif text-[#2d3e2d] mb-1">Studio Branding</h3>
+                            <p class="text-gray-500 text-sm">Update your public identity and contact information.</p>
                         </div>
                     </div>
-                    <div>
-                        <h3 class="text-3xl font-serif text-[#2d3e2d] mb-1">Studio Branding</h3>
-                        <p class="text-gray-500 text-sm">Update your public identity and contact information.</p>
-                    </div>
-                </div>
-
-                <form action="{{ route('profile.update') }}" method="POST" class="bg-white rounded-[2rem] p-10 shadow-sm border border-gray-50 space-y-6">
                     @csrf <div class="grid grid-cols-2 gap-6">
                         <div class="col-span-2 md:col-span-1">
                             <label class="block text-[10px] font-bold tracking-widest text-gray-400 uppercase mb-2">Studio / Business Name</label>
@@ -62,6 +69,16 @@
                             <label class="block text-[10px] font-bold tracking-widest text-gray-400 uppercase mb-2">Physical Address</label>
                             <input type="text" name="address" value="{{ old('address', $vendorProfile->address ?? '') }}" placeholder="e.g., 123 Botanical Ave, Jakarta" required
                                    class="w-full bg-[#f0f2f0] border-transparent rounded-xl px-4 py-3 text-sm focus:border-[#2d3e2d] focus:bg-white outline-none transition-all">
+                        </div>
+
+                        <div class="col-span-2">
+                            <label class="block text-[10px] font-bold tracking-widest text-gray-400 uppercase mb-2">Studio Bio / Description</label>
+                            <textarea name="bio" placeholder="Tell us about your studio, style, and what makes you unique (max 1000 characters)..." maxlength="1000"
+                                      class="w-full bg-[#f0f2f0] border-transparent rounded-xl px-4 py-3 text-sm focus:border-[#2d3e2d] focus:bg-white outline-none transition-all resize-none h-32"
+                                      >{{ old('bio', $vendorProfile->bio ?? '') }}</textarea>
+                            <p class="text-xs text-gray-400 mt-1">
+                                <span id="char_count">{{ old('bio', $vendorProfile->bio ?? '') ? strlen(old('bio', $vendorProfile->bio ?? '')) : 0 }}</span>/1000 characters
+                            </p>
                         </div>
                     </div>
 
@@ -81,6 +98,33 @@
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             lucide.createIcons();
+            
+            // Profile Image Upload Preview
+            const profileImageInput = document.getElementById('profile_image_input');
+            const avatarPreview = document.getElementById('avatar_preview');
+            
+            if (profileImageInput) {
+                profileImageInput.addEventListener('change', function(e) {
+                    const file = e.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = function(event) {
+                            avatarPreview.src = event.target.result;
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
+            }
+            
+            // Bio Character Counter
+            const bioTextarea = document.querySelector('textarea[name="bio"]');
+            const charCount = document.getElementById('char_count');
+            
+            if (bioTextarea && charCount) {
+                bioTextarea.addEventListener('input', function() {
+                    charCount.textContent = this.value.length;
+                });
+            }
         });
     </script>
 </body>

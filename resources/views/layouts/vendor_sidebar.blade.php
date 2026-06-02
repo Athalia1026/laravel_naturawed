@@ -52,9 +52,12 @@
 
     <div class="p-4 mt-auto">
         <div class="bg-[#f0f2f0] p-3 rounded-2xl flex items-center gap-3">
-            <div
-                class="w-10 h-10 rounded-full bg-[#2d3e2d] text-white flex items-center justify-center font-bold font-serif shadow-inner">
-                {{ strtoupper(substr(Auth::user()->name ?? 'V', 0, 1)) }}
+            <div class="w-10 h-10 rounded-full overflow-hidden border border-gray-300 shadow-inner">
+                <img 
+                    src="{{ Auth::user()->vendorProfile && Auth::user()->vendorProfile->profile_image ? asset(Auth::user()->vendorProfile->profile_image) : 'https://ui-avatars.com/api/?name=' . urlencode(Auth::user()->name) . '&background=2d4a22&color=fff' }}" 
+                    alt="Profile" 
+                    class="w-full h-full object-cover"
+                />
             </div>
             <div class="min-w-0">
                 <h4 class="text-xs font-bold truncate text-[#2d3e2d]">
