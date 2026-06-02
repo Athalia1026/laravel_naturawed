@@ -33,11 +33,13 @@
 
                 
                 <form action="{{ route('profile.update') }}" method="POST" enctype="multipart/form-data" class="bg-white rounded-[2rem] p-10 shadow-sm border border-gray-50 space-y-6">
+                    @csrf
+                    
                     <div class="mb-8 flex items-center gap-6">
                         <div class="relative group">
                             <label for="profile_image_input" class="w-24 h-24 rounded-full bg-gray-200 overflow-hidden border-4 border-white shadow-lg relative group cursor-pointer flex items-center justify-center">
                                 @if ($vendorProfile && $vendorProfile->profile_image)
-                                    <img id="avatar_preview" src="{{ $vendorProfile->profile_image }}" alt="Studio Logo" class="w-full h-full object-cover">
+                                    <img id="avatar_preview" src="{{ asset($vendorProfile->profile_image) }}" alt="Studio Logo" class="w-full h-full object-cover">
                                 @else
                                     <img id="avatar_preview" src="https://picsum.photos/seed/vendor/200/200" alt="Studio Logo" class="w-full h-full object-cover">
                                 @endif
@@ -80,6 +82,40 @@
                                 <span id="char_count">{{ old('bio', $vendorProfile->bio ?? '') ? strlen(old('bio', $vendorProfile->bio ?? '')) : 0 }}</span>/1000 characters
                             </p>
                         </div>
+
+                        <div class="col-span-2 pt-6 mt-4 border-t border-gray-100">
+                            <h4 class="text-xl font-serif text-[#2d3e2d] mb-2">Meet the Team Showcase</h4>
+                            <p class="text-xs text-gray-500 mb-6">Upload a group photo of your creative team and provide a compelling introduction story for potential clients.</p>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
+                                <div class="md:col-span-1">
+                                    <label class="block text-[10px] font-bold tracking-widest text-gray-400 uppercase mb-2">Team Group Photograph</label>
+                                    <div class="relative aspect-[4/3] rounded-2xl overflow-hidden bg-gray-100 border-2 border-dashed border-gray-200 hover:border-[#2d3e2d] transition-all flex flex-col items-center justify-center p-2 text-center group cursor-pointer">
+                                        <label for="team_image_input" class="absolute inset-0 z-10 cursor-pointer"></label>
+                                        <input type="file" id="team_image_input" name="team_image" accept="image/*" class="hidden">
+                                        
+                                        @if ($vendorProfile && $vendorProfile->team_image)
+                                            <img id="team_preview" src="{{ asset($vendorProfile->team_image) }}" class="absolute inset-0 w-full h-full object-cover">
+                                        @else
+                                            <img id="team_preview" class="absolute inset-0 w-full h-full object-cover hidden">
+                                            <div id="team_placeholder" class="flex flex-col items-center justify-center text-zinc-400">
+                                                <i data-lucide="image" class="w-8 h-8 mb-2 opacity-60"></i>
+                                                <span class="text-xs font-medium">Select team photo</span>
+                                            </div>
+                                        @endif
+                                    </div>
+                                </div>
+
+                                <div class="md:col-span-2">
+                                    <label class="block text-[10px] font-bold tracking-widest text-gray-400 uppercase mb-2">Team Introduction / Motto</label>
+                                    <input type="text" name="team_description" value="{{ old('team_description', $vendorProfile->team_description ?? '') }}" 
+                                           placeholder="e.g., Meet our award-winning wedding directors who turn dream milestones into zero-waste realities."
+                                           class="w-full bg-[#f0f2f0] border-transparent rounded-xl px-4 py-3 text-sm focus:border-[#2d3e2d] focus:bg-white outline-none transition-all">
+                                    <p class="text-[11px] text-gray-400 mt-2 leading-relaxed">Give a brief summary outlining your collective crew's spirit or combined service excellence (max 255 characters).</p>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
 
                     <div class="flex justify-end gap-4 pt-6 mt-6 border-t border-gray-100">
@@ -99,7 +135,7 @@
         document.addEventListener("DOMContentLoaded", function() {
             lucide.createIcons();
             
-            // Profile Image Upload Preview
+            // 1. Profile Image Upload Preview Handler
             const profileImageInput = document.getElementById('profile_image_input');
             const avatarPreview = document.getElementById('avatar_preview');
             
@@ -115,8 +151,32 @@
                     }
                 });
             }
+
+            // 2. MODIFIKASI: Live Preview Handler Gambar Foto Tim Baru
+            const teamImageInput = document.getElementById('team_image_input');
+            const teamPreview = document.getElementById('team_preview');
+            const teamPlaceholder = document.getElementById('team_placeholder');
+
+            if (teamImageInput) {
+                teamImageInput.addEventListener('change', function(e) {
+                    const file = e.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = function(event) {
+                            if (teamPreview) {
+                                teamPreview.src = event.target.result;
+                                teamPreview.classList.remove('hidden');
+                            }
+                            if (teamPlaceholder) {
+                                teamPlaceholder.classList.add('hidden');
+                            }
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
+            }
             
-            // Bio Character Counter
+            // 3. Bio Character Counter Handler
             const bioTextarea = document.querySelector('textarea[name="bio"]');
             const charCount = document.getElementById('char_count');
             
