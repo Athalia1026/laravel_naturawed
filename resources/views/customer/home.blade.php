@@ -36,7 +36,7 @@
                 <div id="ecoCarousel" class="flex overflow-x-auto gap-6 pb-12 pt-4 px-4 hide-scrollbar">
                     
                     @foreach ($ecoPackages as $item)
-                        <a href="#" class="group relative flex-none w-[340px] overflow-hidden rounded-[2rem] bg-white shadow-xl shadow-gray-200/50 transition-transform duration-300 hover:-translate-y-2 snap-start border border-gray-50">
+                        <a href="{{ route('packages.show', ['id' => $item->id]) }}" class="group relative flex-none w-[340px] overflow-hidden rounded-[2rem] bg-white shadow-xl shadow-gray-200/50 transition-transform duration-300 hover:-translate-y-2 snap-start border border-gray-50">
                             <img src="{{ $item->main_image ?: 'https://picsum.photos/400/300' }}" 
                                  alt="{{ $item->package_name }}" 
                                  class="h-64 w-full object-cover transition-transform duration-700 group-hover:scale-105" 
