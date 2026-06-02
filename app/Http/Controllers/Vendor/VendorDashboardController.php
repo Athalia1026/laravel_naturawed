@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Vendor;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Request;
 use App\Models\Order;
 use App\Models\Package;
 
@@ -85,12 +86,94 @@ class VendorDashboardController extends Controller
             ->where('b.booking_status', 'pending_review') // PERBAIKAN: Gunakan kolom dan value baru
             ->count();
 
+        // F. Fetch Recent Reviews for Vendor
+       $recentReviews = DB::table('reviews as r')
+            ->join('customer_profiles as cp', 'r.customer_id', '=', 'cp.id')
+            ->where('r.vendor_id', $vendorId)
+          
+            
+            ->select(
+                'r.id', 
+                'r.rating', 
+                'r.comment', 
+                'r.vendor_reply',
+                'r.replied_at',
+                'r.created_at', 
+                'cp.full_name as customer_name'
+            )
+            ->orderBy('r.created_at', 'desc')
+            ->take(3)
+            ->get()
+            ->map(function ($review) {
+                // LOGIKA SENSOR ANONIM (MARKETPLACE STYLE)
+                $name = trim($review->customer_name);
+                $length = strlen($name);
+                
+                if ($length > 2) {
+                    $first = substr($name, 0, 1);
+                    $last = substr($name, -1);
+                    $review->masked_name = $first . '***' . $last;
+                } else {
+                    $review->masked_name = 'A***'; // Fallback jika nama terlalu pendek
+                }
+                
+                return $review;
+            });
+
         // Lempar data ke file views
         return view('vendor.dashboard', compact(
             'recentOrders',
             'totalOrdersCount',
             'activePackagesCount',
-            'newInquiriesCount'
+            'newInquiriesCount',
+            'recentReviews'
         ));
+    }
+    /**
+     * Store vendor reply to a customer review
+     */
+    public function reply(Request $request, $reviewId)
+    {
+        // Validation
+        $request->validate([
+            'vendor_reply' => 'required|string|max:1000',
+        ]);
+
+        try {
+            $userId = Auth::id();
+
+            // Get vendor profile
+            $vendorProfile = DB::table('vendor_profiles')
+                ->where('user_id', $userId)
+                ->first();
+
+            if (!$vendorProfile) {
+                return redirect()->back()->with('error', 'Vendor profile not found.');
+            }
+
+            // Get review and verify it belongs to this vendor
+            $review = DB::table('reviews')
+                ->where('id', $reviewId)
+                ->where('vendor_id', $vendorProfile->id)
+                ->first();
+
+            if (!$review) {
+                return redirect()->back()->with('error', 'Review not found or does not belong to you.');
+            }
+
+            // Update review with vendor reply
+            DB::table('reviews')
+                ->where('id', $reviewId)
+                ->update([
+                    'vendor_reply' => $request->vendor_reply,
+                    'replied_at' => now(),
+                ]);
+
+            return redirect()->back()->with('success', 'Your reply has been posted successfully!');
+
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'An error occurred: ' . $e->getMessage());
+        }
+          
     }
 }
