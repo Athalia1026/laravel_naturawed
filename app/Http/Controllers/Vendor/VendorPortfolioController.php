@@ -28,6 +28,6 @@ class VendorPortfolioController extends Controller
             ->get();
 
         // 3. Alirkan data menuju file Blade portfolio
-        return view('vendor.portofolio', compact('myPackages', 'vendorProfile'));
+        return view('vendor.portfolio', compact('myPackages', 'vendorProfile'));
     }
 }
