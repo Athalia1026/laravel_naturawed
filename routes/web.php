@@ -7,11 +7,13 @@ use App\Http\Controllers\Vendor\VendorPortfolioController;
 use App\Http\Controllers\Vendor\VendorProfileController;
 use App\Http\Controllers\Vendor\VendorPackageController;
 use App\Http\Controllers\Vendor\VendorBookingController;
+use App\Http\Controllers\Vendor\VendorReviewController;
 use App\Http\Controllers\Journalist\ArticleController;
 use App\Http\Controllers\Customer\HomeController;
 use App\Http\Controllers\Customer\VendorController as CustomerVendorController;
 use App\Http\Controllers\Customer\BookingController as CustomerBookingController;
 use App\Http\Controllers\Customer\PaymentController as CustomerPaymentController;
+use App\Http\Controllers\Customer\CustomerReviewController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
@@ -53,6 +55,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/vendor/bookings/{id}/approve', [VendorBookingController::class, 'approve'])->name('vendor.bookings.approve');
     Route::post('/vendor/bookings/{id}/reject', [VendorBookingController::class, 'reject'])->name('vendor.bookings.reject');
 
+    // Vendor Review Routes
+    Route::get('/vendor/reviews', [VendorReviewController::class, 'index'])->name('vendor.reviews.index');
+    Route::post('/vendor/reviews/{id}/reply', [VendorDashboardController::class, 'reply'])->name('vendor.reviews.reply');
+
 ///JOURNALIST
     Route::get('/journalist/dashboard', [ArticleController::class, 'dashboard'])
     ->name('journalist.dashboard');
@@ -78,6 +84,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     
     // Booking Detail Route
     Route::get('/bookings/{id}', [CustomerBookingController::class, 'show'])->name('customer.bookings.show');
+
+    // Review Routes
+    Route::post('/reviews/store', [CustomerReviewController::class, 'store'])->name('customer.reviews.store');
 });
 
 Route::get('/packages/{id}', [VendorPackageController::class, 'show'])->name('packages.show');
