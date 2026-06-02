@@ -76,8 +76,8 @@ class RegisteredUserController extends Controller
             return redirect()->intended('/vendor/dashboard'); // Sesuaikan URL rute Anda
         } elseif ($user->role === 'journalist') {
             return redirect()->intended('/journalist-dashboard');
+        } elseif ($user->role === 'customer') {
+            return redirect()->intended('/');
         }
-
-        return redirect()->intended('/');
     }
 }
