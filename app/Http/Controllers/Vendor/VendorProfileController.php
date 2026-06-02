@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 
 class VendorProfileController extends Controller
 {
@@ -32,64 +31,55 @@ class VendorProfileController extends Controller
     {
         $userId = Auth::id();
 
-        // Validation with new fields
         $request->validate([
             'business_name' => 'required|string|max:255',
             'address' => 'required|string|max:255',
             'bio' => 'nullable|string|max:1000',
             'profile_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'team_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'team_description' => 'nullable|string|max:255',
         ]);
 
-        try {
-            // 1. Update nama studio di tabel users (kolom name bawaan breeze)
-            DB::table('users')
-                ->where('id', $userId)
-                ->update(['name' => $request->business_name]);
+        // Ambil profil lama untuk mengamankan path berkas lama jika tidak diubah
+        $oldProfile = DB::table('vendor_profiles')->where('user_id', $userId)->first();
+        
+        $profileImagePath = $oldProfile ? $oldProfile->profile_image : null;
+        $teamImagePath = $oldProfile ? $oldProfile->team_image : null;
 
-            // 2. Prepare data for vendor_profiles update
-            $updateData = [
-                'address' => $request->address,
-                'bio' => $request->bio ?? null,
-                'updated_at' => now()
-            ];
-
-            // 3. Handle profile image upload
-            if ($request->hasFile('profile_image')) {
-                $file = $request->file('profile_image');
-                
-                // Get current profile data to delete old image
-                $currentProfile = DB::table('vendor_profiles')
-                    ->where('user_id', $userId)
-                    ->first();
-
-                // Delete old image if exists
-                if ($currentProfile && $currentProfile->profile_image) {
-                    // Remove /storage/ prefix to get the actual path in storage/app/public/
-                    $oldImagePath = str_replace('/storage/', '', $currentProfile->profile_image);
-                    if (Storage::disk('public')->exists($oldImagePath)) {
-                        Storage::disk('public')->delete($oldImagePath);
-                    }
-                }
-
-                // Store new image
-                $newFileName = 'vendor-' . $userId . '-' . time() . '.' . $file->getClientOriginalExtension();
-                $path = $file->storeAs('uploads/vendors', $newFileName, 'public');
-                
-                // Save the /storage/ path to database
-                $updateData['profile_image'] = '/storage/' . $path;
-            }
-
-            // 4. Update atau buat data baru di tabel vendor_profiles
-            DB::table('vendor_profiles')
-                ->updateOrInsert(
-                    ['user_id' => $userId],
-                    $updateData
-                );
-
-            return redirect()->route('vendor.dashboard')->with('success', 'Profile updated successfully!');
-
-        } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'An error occurred: ' . $e->getMessage());
+        if ($request->hasFile('profile_image')) {
+            $file = $request->file('profile_image');
+            $filename = 'logo-' . $userId . '-' . time() . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('uploads/vendors'), $filename);
+            $profileImagePath = 'uploads/vendors/' . $filename;
         }
+
+        // B. Proses Simpan Gambar Foto Bersama Tim / Meet The Team (Jika Ada)
+        if ($request->hasFile('team_image')) {
+            $file = $request->file('team_image');
+            $filename = 'team-' . $userId . '-' . time() . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('uploads/teams'), $filename);
+            $teamImagePath = 'uploads/teams/' . $filename;
+        }
+
+        // 1. Update nama studio di tabel users (kolom name bawaan breeze)
+        DB::table('users')
+            ->where('id', $userId)
+            ->update(['name' => $request->business_name]);
+
+        // 2. Update atau buat data alamat baru di tabel vendor_profiles
+        DB::table('vendor_profiles')
+            ->updateOrInsert(
+                ['user_id' => $userId],
+                [
+                    'address' => $request->address,
+                    'bio' => $request->bio,
+                    'profile_image' => $profileImagePath,
+                    'team_image' => $teamImagePath,
+                    'team_description' => $request->team_description,
+                    'updated_at' => now()
+                ]
+            );
+
+        return redirect()->route('vendor.dashboard')->with('success', 'Profile updated successfully!');
     }
 }
