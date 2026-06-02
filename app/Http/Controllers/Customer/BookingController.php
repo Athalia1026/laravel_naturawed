@@ -183,6 +183,9 @@ class BookingController extends Controller
         $booking->payment_status = $booking->payment_status ?? 'unpaid';
         $booking->booking_status = $booking->booking_status ?? 'pending_review';
 
-        return view('customer.booking_detail', compact('booking'));
+        // Check if review already exists for this booking
+        $hasReview = DB::table('reviews')->where('booking_id', $id)->exists();
+
+        return view('customer.booking_detail', compact('booking', 'hasReview'));
     }
 }

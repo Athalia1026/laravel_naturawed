@@ -171,22 +171,64 @@ class VendorPackageController extends Controller
     /**
      * SISI PUBLIK: DETAIL PAKET (SHOW)
      */
+   /**
+     * SISI PUBLIK: DETAIL PAKET (SHOW)
+     */
     public function show($id)
     {
         $package = DB::table('packages as p')
             ->leftJoin('vendor_profiles as vp', 'p.vendor_id', '=', 'vp.id')
             ->leftJoin('categories as c', 'p.category_id', '=', 'c.id')
             ->where('p.id', $id)
-            ->select('p.*', 'vp.business_name', 'c.name as category_name')
+            ->select('p.*', 'vp.business_name', 'vp.profile_image', 'c.name as category_name')
             ->first();
 
         if (!$package) {
             return abort(404, 'Maaf, paket pernikahan tidak ditemukan.');
         }
 
-        return view('customer.package_detail', compact('package'));
-    }
+        // 1. Buat Blueprint Query Dasar untuk Ulasan
+        $reviewsQuery = DB::table('reviews as r')
+            ->join('bookings as b', 'r.booking_id', '=', 'b.id')
+            ->join('customer_profiles as cp', 'r.customer_id', '=', 'cp.id')
+            ->where('b.package_id', $id);
 
+        // 2. Hitung Rata-rata & Total dari Seluruh Data (Sebelum di-paginate)
+        $averageRating = $reviewsQuery->avg('r.rating') ?? 0;
+        $totalReviews = $reviewsQuery->count();
+
+        // 3. Eksekusi Pagination (Tarik 5 data untuk halaman aktif)
+        $reviews = $reviewsQuery
+            ->select(
+                'r.id',
+                'r.rating',
+                'r.comment',
+                'r.vendor_reply',
+                'r.replied_at',
+                'r.created_at',
+                'cp.full_name as customer_name'
+            )
+            ->orderBy('r.created_at', 'desc')
+            ->paginate(5); // <-- Pagination dieksekusi di sini dengan benar
+
+        // 4. Modifikasi Koleksi yang sudah di-paginate (Data Masking)
+        $reviews->getCollection()->transform(function ($review) {
+            $name = trim($review->customer_name);
+            $length = strlen($name);
+            
+            if ($length > 2) {
+                $first = substr($name, 0, 1);
+                $last = substr($name, -1);
+                $review->masked_name = $first . '***' . $last;
+            } else {
+                $review->masked_name = 'A***';
+            }
+            
+            return $review;
+        });
+
+        return view('customer.package_detail', compact('package', 'reviews', 'averageRating', 'totalReviews'));
+    }
     /**
      * SISI CUSTOMER: HALAMAN CHECKOUT (CHECKOUT)
      */
