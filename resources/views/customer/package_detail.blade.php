@@ -38,11 +38,12 @@
                                 class="w-full h-full object-cover">
                             <div class="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white bg-green-500"></div>
                         </div>
-                        <div>
+                        <div onclick="event.stopPropagation(); window.location.href='{{ route('vendor.show', ['id' => $package->vendor_id]) }}';" 
+                            class="cursor-pointer group/vendor inline-block">
                             <p class="text-xs font-medium text-gray-400">Designed by</p>
-                            <h3 class="text-xl font-bold text-[#2d4a22]">
+                            <span class="text-[#2d4a22] font-semibold hover:underline group-hover/vendor:text-amber-700 transition-colors">
                                 {{ $package->business_name ?? 'NaturaWed Vendor' }}
-                            </h3>
+                            </span>
                         </div>
                     </div>
                 </div>
