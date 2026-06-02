@@ -48,7 +48,7 @@
                     </a>
 
                     {{-- Inspiration --}}
-                    <a href=""
+                    <a href="{{ route('customer.inspiration') }}"
                         class="text-[11px] tracking-[0.15em] uppercase transition-colors
                         {{ Route::is('inspiration') || Route::is('inspiration.*')
                             ? 'relative font-bold text-[#2d4a22] after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:w-full after:bg-[#2d4a22] pb-1'

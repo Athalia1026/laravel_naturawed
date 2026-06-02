@@ -15,13 +15,15 @@ use App\Http\Controllers\Customer\BookingController as CustomerBookingController
 use App\Http\Controllers\Customer\PaymentController as CustomerPaymentController;
 use App\Http\Controllers\Customer\CustomerReviewController;
 use App\Http\Controllers\Customer\VendorDisplayController;
+use App\Http\Controllers\Journalist\ProfileController as JournalistProfileController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
 Route::get('/vendors', [CustomerVendorController::class, 'index'])->name('customer.vendors');
 
 Route::get('/packages/{id}', [VendorPackageController::class, 'show'])->name('packages.show');
-
+// Rute Publik untuk Halaman Inspirasi
+Route::get('/inspiration', [App\Http\Controllers\Journalist\ArticleController::class, 'index'])->name('customer.inspiration');
 
 require __DIR__ . '/auth.php';
 
@@ -68,7 +70,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::post('/journalist/article/store', [ArticleController::class, 'store']) // Nanti kamu bikin fungsi store-nya ya!
     ->name('journalist.article.store');
-
+    Route::get('/journalist/profile', [JournalistProfileController::class, 'edit'])->name('journalist.profile.edit');
+    Route::post('/journalist/profile', [ProfileController::class, 'update'])->name('journalist.profile.update');
     Route::get('/checkout/{id}', [CustomerBookingController::class, 'checkout'])->name('customer.checkout');
     
     // 2. RUTE POST: Untuk memproses simpan data pesanan (Sudah kita buat sebelumnya)

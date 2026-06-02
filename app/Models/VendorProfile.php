@@ -30,4 +30,12 @@ class VendorProfile extends Model
     {
         return $this->hasMany(Package::class, 'vendor_id');
     }
+    /**
+     * Relasi ke model Review.
+     * Satu profil vendor bisa memiliki banyak review dari customer.
+     */
+    public function reviews()
+    {
+        return $this->hasMany(Review::class, 'vendor_id');
+    }
 }
