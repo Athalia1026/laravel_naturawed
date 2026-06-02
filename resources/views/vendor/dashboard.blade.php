@@ -41,12 +41,10 @@
                         <button class="hover:text-[#2d3e2d] transition-colors"><i data-lucide="mail" class="w-5 h-5"></i></button>
                         <button class="hover:text-[#2d3e2d] transition-colors"><i data-lucide="settings" class="w-5 h-5"></i></button>
                         
-                        <div class="w-10 h-10 rounded-full overflow-hidden border border-gray-100 cursor-pointer">
-                            <img 
-                                src="{{ Auth::user()->vendorProfile && Auth::user()->vendorProfile->profile_image ? asset(Auth::user()->vendorProfile->profile_image) : 'https://ui-avatars.com/api/?name=' . urlencode(Auth::user()->name) . '&background=2d4a22&color=fff' }}" 
-                                alt="Profile" 
-                                class="w-full h-full object-cover"
-                            />
+                        <div class="w-10 h-10 rounded-full bg-gray-200 overflow-hidden border border-gray-100 cursor-pointer">
+                            <img src="{{ $vendorProfile && $vendorProfile->profile_image ? asset($vendorProfile->profile_image) : 'https://ui-avatars.com/api/?name=' . urlencode(Auth::user()->name) . '&background=2d4a22&color=fff' }}" 
+                                alt="Vendor Logo"
+                                class="w-full h-full object-cover" referrerpolicy="no-referrer" />
                         </div>
                     </div>
                 </div>
