@@ -126,7 +126,8 @@ class VendorDashboardController extends Controller
             'totalOrdersCount',
             'activePackagesCount',
             'newInquiriesCount',
-            'recentReviews'
+            'recentReviews',
+            'vendorProfile'
         ));
     }
     /**
