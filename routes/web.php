@@ -14,6 +14,7 @@ use App\Http\Controllers\Customer\VendorController as CustomerVendorController;
 use App\Http\Controllers\Customer\BookingController as CustomerBookingController;
 use App\Http\Controllers\Customer\PaymentController as CustomerPaymentController;
 use App\Http\Controllers\Customer\CustomerReviewController;
+use App\Http\Controllers\Customer\VendorDisplayController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
@@ -34,8 +35,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/vendor/dashboard', [VendorDashboardController::class, 'index'])
         ->name('vendor.dashboard');
 
-    Route::get('/vendor/portfolio', [VendorPortfolioController::class, 'index'])
-        ->name('vendor.portfolio');
+    Route::get('/vendor/portfolio', [VendorPortfolioController::class, 'index'])->name('vendor.portfolio');
 
     Route::get('/vendor/profile', [VendorProfileController::class, 'edit'])
         ->name('profile.edit');
@@ -91,3 +91,4 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 Route::get('/packages/{id}', [VendorPackageController::class, 'show'])->name('packages.show');
 Route::get('/packages/{id}/checkout', [VendorPackageController::class, 'checkout'])->name('packages.checkout');
+Route::get('/vendor-detail/{id}', [VendorDisplayController::class, 'show'])->name('vendor.show');
