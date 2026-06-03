@@ -46,6 +46,7 @@ class PaymentController extends Controller
             'payment_proof' => 'required|image|mimes:jpeg,png,jpg|max:2048', // Batas maksimal 2MB
         ]);
 
+        DB::beginTransaction();
         try {
             $bookingId = $request->booking_id;
             $imagePathDb = null;
@@ -73,7 +74,7 @@ class PaymentController extends Controller
                 ->where('booking_id', $bookingId)
                 ->update([
                     'payment_proof' => $imagePathDb,
-                 
+                    'status'        => 'paid',
                     'updated_at' => now()
                 ]);
 
@@ -83,15 +84,17 @@ class PaymentController extends Controller
                     ->update([
                         'payment_status' => 'success'
                     ]);
-
+                DB::commit();
                 return response()->json([
                     'status' => 'success',
                     'message' => 'Payment proof submitted successfully.'
                 ]);
             }
             return response()->json(['status' => 'error', 'message' => 'Gagal memperbarui status basis data.'], 500);
+            
 
         } catch (\Exception $e) {
+            DB::rollBack();
             return response()->json(['status' => 'error', 'message' => 'Server Error: ' . $e->getMessage()], 500);
         }
     }
