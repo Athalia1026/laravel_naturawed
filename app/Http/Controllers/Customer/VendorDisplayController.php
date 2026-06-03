@@ -27,6 +27,13 @@ class VendorDisplayController extends Controller
             ->orderBy('p.created_at', 'desc')
             ->get();
 
-        return view('customer/vendor_detail', compact('vendorProfile', 'vendorUser', 'myPackages'));
+        $ratingStats = DB::table('reviews')
+        ->where('vendor_id', $id)
+        ->select(
+            DB::raw('AVG(rating) as average_rating'),
+            DB::raw('COUNT(id) as total_reviews')
+        )
+        ->first();
+        return view('customer/vendor_detail', compact('vendorProfile', 'vendorUser', 'myPackages', 'ratingStats'));
     }
 }
