@@ -63,7 +63,7 @@ class AnalyticsController extends Controller
 
             // 🌿 BARU: Filter ketat agar hanya menghitung transaksi yang sukses/approved
             // (Jika string penanda selesai di DB Anda adalah 'success', ganti 'approved' menjadi 'success')
-            ->where('bookings.booking_status', '=', 'approved')
+            ->where('bookings.payment_status', '=', 'success')
 
             ->select(
                 'packages.package_name',
@@ -82,33 +82,46 @@ class AnalyticsController extends Controller
             $packageData[] = (int) $pkg->total_booked;
         }
 
-        // --- 3. DATA STATUS BOOKING (Riil Mengelompokkan Status dari Tabel Bookings) ---
-        $bookingStatuses = DB::table('bookings')
+        // --- 3. DATA STATUS BOOKING (DENGAN KONDISI BARU) ---
+        $bookingData = DB::table('bookings')
             ->join('packages', 'bookings.package_id', '=', 'packages.id')
+            ->leftJoin('payments', 'bookings.id', '=', 'payments.booking_id')
             ->where('packages.vendor_id', $vendorProfile->id)
             ->select(
                 'bookings.booking_status',
-                DB::raw('COUNT(bookings.id) as count')
+                'bookings.payment_status' // Asumsi: 'success', 'unpaid', dll
             )
-            ->groupBy('bookings.booking_status')
             ->get();
 
-        // Siapkan struktur mapping sesuai urutan labels: Pending, Success, Cancelled
-        $statusCounts = ['pending_review' => 0, 'approved' => 0, 'rejected' => 0]; // Sesuaikan dengan value ENUM asli Anda
+        $statusCounts = [
+            'pending_review' => 0,
+            'rejected' => 0,
+            'approved_unpaid' => 0, // approved tapi payment_status = unpaid
+            'confirmed' => 0, // approved dan payment_status = success
+        ];
 
-        foreach ($bookingStatuses as $status) {
-            if (array_key_exists($status->booking_status, $statusCounts)) {
-                $statusCounts[$status->booking_status] = $status->count;
+        foreach ($bookingData as $item) {
+            if ($item->booking_status == 'pending_review') {
+                $statusCounts['pending_review']++;
+            } elseif ($item->booking_status == 'rejected') {
+                $statusCounts['rejected']++;
+            } elseif ($item->booking_status == 'approved') {
+                // Cek pembayaran untuk status approved
+                if ($item->payment_status == 'success') {
+                    $statusCounts['confirmed']++;
+                } else {
+                    $statusCounts['approved_unpaid']++;
+                }
             }
         }
 
-        $statusLabels = ['Pending Review', 'Approved', 'Rejected'];
+        $statusLabels = ['Pending Review', 'Rejected', 'Approved (Unpaid)', 'Confirmed (Paid)'];
         $statusData = [
             $statusCounts['pending_review'],
-            $statusCounts['approved'],
-            $statusCounts['rejected']
+            $statusCounts['rejected'],
+            $statusCounts['approved_unpaid'],
+            $statusCounts['confirmed']
         ];
-
 
         // 2. Kirim semua data riil beserta $vendorProfile ke view agar sidebar tidak eror
         return view('vendor.analytics', compact(

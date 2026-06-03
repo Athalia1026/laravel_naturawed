@@ -135,7 +135,11 @@
                     labels: {!! json_encode($statusLabels) !!},
                     datasets: [{
                         data: {!! json_encode($statusData) !!},
-                        backgroundColor: ['#c5a059', '#2d4a22', '#ef4444'], // Emas, Hijau, Merah
+                        backgroundColor: [
+                        '#c5a059',
+                        '#ef4444',
+                        '#f97316',
+                        '#2d4a22',], // Emas, Hijau, Merah
                         borderWidth: 0
                     }]
                 },
