@@ -8,7 +8,33 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class ProfileController extends Controller
-{
+{   
+    /**
+     * Menampilkan Halaman Lihat Profile & Statistik Jurnalis
+     */
+    public function show()
+    {
+        $userId = Auth::id();
+
+        // Ambil data profil
+        $profile = DB::table('journalist_profiles')->where('user_id', $userId)->first();
+
+        if (!$profile) {
+            $profile = (object)[
+                'full_name' => Auth::user()->name,
+                'bio' => 'Tell readers about your journalistic experience...',
+                'profile_image' => null,
+                'header_image' => null,
+            ];
+        }
+
+       
+        $totalArticles = DB::table('articles')->where('user_id', $userId)->count();
+        $totalViews = DB::table('articles')->where('user_id', $userId)->sum('views_count'); 
+
+        return view('journalist.profile_show', compact('profile', 'totalArticles', 'totalViews'));
+    }
+
     /**
      * Menampilkan Form Edit Profile Jurnalis
      */
@@ -51,8 +77,8 @@ class ProfileController extends Controller
         // Ambil profil lama untuk mengamankan path berkas lama jika tidak diubah
         $oldProfile = DB::table('journalist_profiles')->where('user_id', $userId)->first();
         
-        $profileImagePath = $oldProfile ? $oldProfile->profile_image : null;
-        $headerImagePath = $oldProfile ? $oldProfile->header_image : null;
+        $profileImagePath = $oldProfile->profile_image ?? null;
+        $headerImagePath = $oldProfile->header_image ?? null;
 
         // Proses Simpan Gambar Profil
         if ($request->hasFile('profile_image')) {
@@ -89,6 +115,6 @@ class ProfileController extends Controller
                 ]
             );
 
-        return redirect()->back()->with('success', 'Profile updated successfully!');
+        return redirect()->route('journalist.profile.show')->with('success', 'Profile updated successfully!');
     }
 }
