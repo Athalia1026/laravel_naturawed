@@ -31,7 +31,6 @@
                     </div>
                 @endif
 
-                
                 <form action="{{ route('profile.update') }}" method="POST" enctype="multipart/form-data" class="bg-white rounded-[2rem] p-10 shadow-sm border border-gray-50 space-y-6">
                     @csrf
                     
@@ -54,7 +53,33 @@
                             <p class="text-gray-500 text-sm">Update your public identity and contact information.</p>
                         </div>
                     </div>
-                    @csrf <div class="grid grid-cols-2 gap-6">
+
+                    <div class="grid grid-cols-2 gap-6">
+                        
+                        {{-- ==================== 🌿 BARU: COVER BACKGROUND BANNER SHOWCASE ==================== --}}
+                        <div class="col-span-2">
+                            <label class="block text-[10px] font-bold tracking-widest text-gray-400 uppercase mb-2">Hero Cover Background Banner</label>
+                            <div class="relative h-48 w-full rounded-2xl overflow-hidden bg-gray-100 border-2 border-dashed border-gray-200 hover:border-[#2d3e2d] transition-all group flex flex-col items-center justify-center text-center cursor-pointer">
+                                <label for="cover_image_input" class="absolute inset-0 z-10 cursor-pointer"></label>
+                                <input type="file" id="cover_image_input" name="cover_image" accept="image/jpeg,image/png,image/jpg,image/webp" class="hidden">
+                                
+                                @if ($vendorProfile && $vendorProfile->cover_image)
+                                    <img id="cover_preview" src="{{ asset($vendorProfile->cover_image) }}" class="absolute inset-0 w-full h-full object-cover">
+                                    <div class="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors z-0"></div>
+                                @else
+                                    <img id="cover_preview" class="absolute inset-0 w-full h-full object-cover hidden">
+                                    <div class="absolute inset-0 bg-black/10 hidden group-hover:block z-0"></div>
+                                @endif
+
+                                <div id="cover_content_wrapper" class="relative z-10 text-zinc-400 group-hover:text-white transition-colors p-4">
+                                    <i data-lucide="image-plus" class="w-8 h-8 mb-2 mx-auto opacity-70"></i>
+                                    <span class="text-xs font-semibold block mb-1">Click to change cover background banner</span>
+                                    <span class="text-[10px] opacity-60 block">Recommended landscape format (min. 1920x1080px, max 3MB)</span>
+                                </div>
+                            </div>
+                        </div>
+                        {{-- ============================================================================== --}}
+
                         <div class="col-span-2 md:col-span-1">
                             <label class="block text-[10px] font-bold tracking-widest text-gray-400 uppercase mb-2">Studio / Business Name</label>
                             <input type="text" name="business_name" value="{{ old('business_name', Auth::user()->name) }}" required
@@ -71,6 +96,24 @@
                             <label class="block text-[10px] font-bold tracking-widest text-gray-400 uppercase mb-2">Physical Address</label>
                             <input type="text" name="address" value="{{ old('address', $vendorProfile->address ?? '') }}" placeholder="e.g., 123 Botanical Ave, Jakarta" required
                                    class="w-full bg-[#f0f2f0] border-transparent rounded-xl px-4 py-3 text-sm focus:border-[#2d3e2d] focus:bg-white outline-none transition-all">
+                        </div>
+
+                        <div class="col-span-2 md:col-span-1">
+                            <label class="block text-[10px] font-bold tracking-widest text-gray-400 uppercase mb-2">Instagram Username</label>
+                            <div class="relative flex items-center w-full">
+                                <span class="absolute left-4 text-sm font-medium text-gray-400">@</span>
+                                <input type="text" name="instagram" value="{{ old('instagram', $vendorProfile->instagram ?? '') }}" placeholder="naturawed.studio"
+                                       class="w-full bg-[#f0f2f0] border-transparent rounded-xl pl-9 pr-4 py-3 text-sm focus:border-[#2d3e2d] focus:bg-white outline-none transition-all">
+                            </div>
+                        </div>
+
+                        <div class="col-span-2 md:col-span-1">
+                            <label class="block text-[10px] font-bold tracking-widest text-gray-400 uppercase mb-2">Website URL</label>
+                            <div class="relative flex items-center w-full">
+                                <span class="absolute left-4 text-sm font-medium text-gray-400"><i data-lucide="globe" class="w-4 h-4 text-gray-400"></i></span>
+                                <input type="url" name="website" value="{{ old('website', $vendorProfile->website ?? '') }}" placeholder="https://www.yourstudio.com"
+                                       class="w-full bg-[#f0f2f0] border-transparent rounded-xl pl-11 pr-4 py-3 text-sm focus:border-[#2d3e2d] focus:bg-white outline-none transition-all">
+                            </div>
                         </div>
 
                         <div class="col-span-2">
@@ -152,7 +195,32 @@
                 });
             }
 
-            // 2. MODIFIKASI: Live Preview Handler Gambar Foto Tim Baru
+            // 2. 🌿 BARU: Live Preview Handler Gambar Cover Background Banner
+            const coverImageInput = document.getElementById('cover_image_input');
+            const coverPreview = document.getElementById('cover_preview');
+            const wrapperContent = document.getElementById('cover_content_wrapper');
+
+            if (coverImageInput) {
+                coverImageInput.addEventListener('change', function(e) {
+                    const file = e.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = function(event) {
+                            if (coverPreview) {
+                                coverPreview.src = event.target.result;
+                                coverPreview.classList.remove('hidden');
+                            }
+                            if (wrapperContent) {
+                                // Mengubah teks menjadi warna putih agar kontras di atas gambar preview kover
+                                wrapperContent.classList.add('text-white', 'bg-black/30');
+                            }
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
+            }
+
+            // 3. Live Preview Handler Gambar Foto Tim Baru
             const teamImageInput = document.getElementById('team_image_input');
             const teamPreview = document.getElementById('team_preview');
             const teamPlaceholder = document.getElementById('team_placeholder');
@@ -176,7 +244,7 @@
                 });
             }
             
-            // 3. Bio Character Counter Handler
+            // 4. Bio Character Counter Handler
             const bioTextarea = document.querySelector('textarea[name="bio"]');
             const charCount = document.getElementById('char_count');
             
