@@ -10,12 +10,24 @@
 
     {{-- HERO BANNER — STATIS: Menggunakan gambar Unsplash sesuai permintaan --}}
     <div class="relative h-[480px] w-full overflow-hidden block">
+        @if($vendorProfile && $vendorProfile->cover_image)
+        {{-- Menampilkan gambar kover kustom hasil unggahan vendor dari database --}}
         <img
-            src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=2074&auto=format&fit=crop"
+            src="{{ asset($vendorProfile->cover_image) }}"
             alt="Vendor Cover Background"
             class="w-full h-full object-cover"
             referrerpolicy="no-referrer"
         />
+    @else
+        {{-- Gambar fallback bawaan jika vendor bersangkutan belum mengunggah kover kustom --}}
+        <img
+            src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=2074&auto=format&fit=crop"
+            alt="Vendor Default Cover Background"
+            class="w-full h-full object-cover"
+            referrerpolicy="no-referrer"
+        />
+    @endif
+    
         <div class="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/20"></div>
 
         <button onclick="window.history.back()" class="absolute top-6 left-6 p-3 bg-white/20 backdrop-blur-md text-white rounded-full hover:bg-white/40 transition-all border border-white/30 cursor-pointer outline-none flex items-center justify-center z-20">
@@ -54,9 +66,15 @@
                                 </h1>
                                 <div class="flex flex-wrap items-center justify-center lg:justify-start gap-4 mt-3">
                                     <div class="flex items-center gap-1.5 text-[#c5a059] bg-yellow-50 px-3 py-1 rounded-full text-sm font-semibold">
-                                        <svg class="w-4 h-4 fill-[#c5a059] text-[#c5a059]" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
-                                        <span>4.9</span>
-                                        <span class="text-gray-400 font-normal">(128 Reviews)</span>
+                                        <svg class="w-4 h-4 fill-[#c5a059] text-[#c5a059]" viewBox="0 0 20 20">
+                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                        </svg>
+                                        <span>
+                                            {{ $ratingStats && $ratingStats->average_rating ? number_format((float)$ratingStats->average_rating, 1) : '0.0' }}
+                                        </span>
+                                        <span class="text-gray-400 font-normal">
+                                            ({{ $ratingStats && $ratingStats->total_reviews ? $ratingStats->total_reviews : 0 }} Reviews)
+                                        </span>
                                     </div>
                                     <div class="flex items-center gap-1.5 text-gray-500 bg-gray-50 px-3 py-1 rounded-full text-xs">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" stroke-width="2"></path><path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" stroke-width="2"></path></svg>
@@ -78,16 +96,36 @@
                         </p>
 
                         <div class="flex flex-wrap justify-center lg:justify-start gap-8 pt-4 border-t border-gray-100 text-xs font-bold tracking-widest text-[#2d4a22]/70">
-                            <a href="#" class="flex items-center gap-2.5 hover:text-[#2d4a22] transition-colors uppercase no-underline">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9-9c1.657 0 3 4.03 3 9s-1.343 9-3 9m0-18c-1.657 0-3 4.03-3 9s1.343 9 3 9m-9-9h18" stroke-width="2"></path></svg> WEBSITE
-                            </a>
-                            <a href="#" class="flex items-center gap-2.5 hover:text-[#2d4a22] transition-colors uppercase no-underline">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M7 4v16M17 4v16M3 8h18M3 16h18" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg> INSTAGRAM
-                            </a>
-                            <a href="#" class="flex items-center gap-2.5 hover:text-[#2d4a22] transition-colors uppercase no-underline">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-                                {{ $vendorUser->email ?? 'EMAIL' }}
-                            </a>
+    
+                            {{-- 🌿 WEBSITE LINK --}}
+                            @if($vendorProfile && $vendorProfile->website)
+                                <a href="{{ $vendorProfile->website }}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2.5 hover:text-[#2d4a22] transition-colors uppercase no-underline">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9-9c1.657 0 3 4.03 3 9s-1.343 9-3 9m0-18c-1.657 0-3 4.03-3 9s1.343 9 3 9m-9-9h18" stroke-width="2"></path></svg> 
+                                    {{ $vendorProfile->website }}
+                                </a>
+                            @endif
+
+                            {{-- 🌿 INSTAGRAM LINK (Otomatis redirect ke instagram.com/username) --}}
+                            @if($vendorProfile && $vendorProfile->instagram)
+                                <a href="https://instagram.com/{{ ltrim($vendorProfile->instagram, '@') }}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2.5 hover:text-[#2d4a22] transition-colors uppercase no-underline">
+                                    <svg class="w-4 h-4 fill-current text-[#2d4a22]/70 group-hover:text-[#2d4a22]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                                        <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                                    </svg>
+                                    {{ $vendorProfile->instagram }}
+                                </a>
+                            @endif
+
+                            {{-- 🌿 EMAIL LINK (Otomatis memicu aplikasi mail client / gmail kustomer) --}}
+                            @if(isset($vendorUser->email) || isset($vendorProfile->email))
+                                @php
+                                    $emailTarget = $vendorUser->email ?? $vendorProfile->email; 
+                                @endphp
+                                <a href="mailto:{{ $emailTarget }}" class="flex items-center gap-2.5 hover:text-[#2d4a22] transition-colors uppercase no-underline">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                                    {{ $emailTarget }}
+                                </a>
+                            @endif
+                            
                         </div>
                     </div>
                 </div>
