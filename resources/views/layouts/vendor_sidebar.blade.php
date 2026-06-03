@@ -37,6 +37,20 @@
             @endif
         </a>
 
+        <a href="{{ route('vendor.analytics') }}"
+            class="flex items-center gap-3 px-4 py-3 rounded-xl transition-colors text-sm font-medium relative 
+            {{ Route::is('vendor.analytics') ? 'bg-[#f0f2f0] text-[#2d3e2d] font-semibold' : 'text-gray-500 hover:bg-gray-50' }}">
+                <i data-lucide="bar-chart-3" class="w-[18px] h-[18px]"></i>
+                Analytics & Reports
+                
+                {{-- Indikator garis vertikal di sebelah kanan jika menu sedang aktif --}}
+                @if(Route::is('vendor.analytics'))
+                    <div class="absolute right-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-[#2d3e2d] rounded-l-full"></div>
+                @endif
+        </a>
+
+
+
         <div class="pt-6 mt-6 border-t border-gray-100">
             <form method="POST" action="{{ route('logout') }}"
                 onsubmit="return confirm('Apakah Anda yakin ingin keluar?')">
