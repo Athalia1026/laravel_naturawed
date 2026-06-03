@@ -16,6 +16,8 @@ use App\Http\Controllers\Customer\PaymentController as CustomerPaymentController
 use App\Http\Controllers\Customer\CustomerReviewController;
 use App\Http\Controllers\Customer\VendorDisplayController;
 use App\Http\Controllers\Journalist\ProfileController as JournalistProfileController;
+use App\Http\Controllers\Vendor\AnalyticsController;
+
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
@@ -60,6 +62,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Vendor Review Routes
     Route::get('/vendor/reviews', [VendorReviewController::class, 'index'])->name('vendor.reviews.index');
     Route::post('/vendor/reviews/{id}/reply', [VendorDashboardController::class, 'reply'])->name('vendor.reviews.reply');
+
+    Route::get('/vendor/analytics', [AnalyticsController::class, 'index'])->name('vendor.analytics');
+    Route::get('/vendor/analytics/export-pdf', [AnalyticsController::class, 'exportPdf'])->name('vendor.analytics.pdf');
 
 ///JOURNALIST
     Route::get('/journalist/dashboard', [ArticleController::class, 'dashboard'])
