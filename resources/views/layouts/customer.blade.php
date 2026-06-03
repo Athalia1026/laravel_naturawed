@@ -57,9 +57,9 @@
                     </a>
 
                     {{-- About --}}
-                    <a href=""
+                    <a href="{{ route('customer.about') }}"
                         class="text-[11px] tracking-[0.15em] uppercase transition-colors
-                        {{ Route::is('about') || Route::is('about.*')
+                        {{ Route::is('customer.about') || Route::is('customer.about.*')
                             ? 'relative font-bold text-[#2d4a22] after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:w-full after:bg-[#2d4a22] pb-1'
                             : 'font-semibold text-zinc-400 hover:text-[#2d4a22]' }}">
                         About

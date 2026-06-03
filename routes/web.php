@@ -96,3 +96,4 @@ Route::middleware(['auth', 'verified'])->group(function () {
 Route::get('/packages/{id}', [VendorPackageController::class, 'show'])->name('packages.show');
 Route::get('/packages/{id}/checkout', [VendorPackageController::class, 'checkout'])->name('packages.checkout');
 Route::get('/vendor-detail/{id}', [VendorDisplayController::class, 'show'])->name('vendor.show');
+Route::get('/about', function () {return view('customer.about');})->name('customer.about');
