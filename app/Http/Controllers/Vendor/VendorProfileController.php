@@ -34,9 +34,12 @@ class VendorProfileController extends Controller
         $request->validate([
             'business_name' => 'required|string|max:255',
             'address' => 'required|string|max:255',
+            'instagram' => 'nullable|string|max:100',
+            'website' => 'nullable|string|max:255',
             'bio' => 'nullable|string|max:1000',
             'profile_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
-            'team_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'team_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:3072',
             'team_description' => 'nullable|string|max:255',
         ]);
 
@@ -45,6 +48,7 @@ class VendorProfileController extends Controller
         
         $profileImagePath = $oldProfile ? $oldProfile->profile_image : null;
         $teamImagePath = $oldProfile ? $oldProfile->team_image : null;
+        $coverImagePath = $oldProfile ? $oldProfile->cover_image : null;
 
         if ($request->hasFile('profile_image')) {
             $file = $request->file('profile_image');
@@ -61,6 +65,13 @@ class VendorProfileController extends Controller
             $teamImagePath = 'uploads/teams/' . $filename;
         }
 
+        if ($request->hasFile('cover_image')) {
+            $file = $request->file('cover_image');
+            $filename = 'cover-' . $userId . '-' . time() . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('uploads/covers'), $filename);
+            $coverImagePath = 'uploads/covers/' . $filename;
+        }
+
         // 1. Update nama studio di tabel users (kolom name bawaan breeze)
         DB::table('users')
             ->where('id', $userId)
@@ -73,7 +84,10 @@ class VendorProfileController extends Controller
                 [
                     'address' => $request->address,
                     'bio' => $request->bio,
+                    'instagram' => $request->instagram,
+                    'website' => $request->website,
                     'profile_image' => $profileImagePath,
+                    'cover_image' => $coverImagePath,
                     'team_image' => $teamImagePath,
                     'team_description' => $request->team_description,
                     'updated_at' => now()

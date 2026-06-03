@@ -12,7 +12,12 @@ class VendorProfile extends Model
         'user_id',
         'business_name',
         'address',
+        'instagram',
+        'website',
+        'cover_image',
         'profile_image',
+        'team_image',
+        'team_description',
         'bio',
     ];
 
