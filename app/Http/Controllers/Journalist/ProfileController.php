@@ -29,8 +29,8 @@ class ProfileController extends Controller
         }
 
        
-        $totalArticles = DB::table('articles')->where('user_id', $userId)->count();
-        $totalViews = DB::table('articles')->where('user_id', $userId)->sum('views_count'); 
+        $totalArticles = DB::table('articles')->where('journalist_id', $userId)->count();
+        $totalViews = DB::table('articles')->where('journalist_id', $userId)->sum('views_count');
 
         return view('journalist.profile_show', compact('profile', 'totalArticles', 'totalViews'));
     }

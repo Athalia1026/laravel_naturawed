@@ -98,6 +98,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Review Routes
     Route::post('/reviews/store', [CustomerReviewController::class, 'store'])->name('customer.reviews.store');
+    // Rute untuk melihat detail artikel
+Route::get('/article/{id}', [\App\Http\Controllers\Customer\ArticleController::class, 'show'])->name('customer.article.show');
+
+// Rute untuk melihat profil jurnalis (Author) dari sisi customer
+Route::get('/author/{id}', [\App\Http\Controllers\Customer\ArticleController::class, 'authorProfile'])->name('customer.author.profile');
 });
 
 Route::get('/packages/{id}', [VendorPackageController::class, 'show'])->name('packages.show');
