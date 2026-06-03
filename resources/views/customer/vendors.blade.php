@@ -82,8 +82,13 @@
                                     {{ $pkg->package_name }}
                                 </h3>
                                 <div class="flex items-center text-gray-500 text-sm">
-                                    <span>🌿 By <span class="text-[#2d4a22] font-semibold hover:underline">{{ $pkg->business_name ?? 'NaturaWed Vendor' }}</span></span>
-                                </div>
+                                <span>🌿 By
+                                    <span onclick="event.preventDefault(); event.stopPropagation(); window.location.href='{{ route('vendor.show', ['id' => $pkg->vendor_id]) }}';" 
+                                        class="text-[#2d4a22] font-semibold hover:underline hover:text-amber-700 transition-colors cursor-pointer">
+                                        {{ $pkg->business_name ?? 'NaturaWed Vendor' }}
+                                    </span>
+                                </span>
+                            </div>
                             </div>
                             
                             <div class="pt-3 border-t border-gray-50 flex items-center justify-between">
