@@ -18,6 +18,8 @@ class VendorPortfolioController extends Controller
             ->first();
 
         $vendorId = $vendorProfile ? $vendorProfile->id : 0;
+        $ratingStats = (object) ['average_rating' => 0, 'total_reviews' => 0];
+        $myPackages = collect();
 
         // 2. Ambil semua paket yang dimiliki oleh vendor ini (Konversi fungsi getPackagesByVendor)
         $myPackages = DB::table('packages as p')
@@ -27,7 +29,15 @@ class VendorPortfolioController extends Controller
             ->orderBy('p.created_at', 'desc')
             ->get();
 
+        $ratingStats = DB::table('reviews')
+            ->where('vendor_id', $vendorProfile->id)
+            ->select(
+                DB::raw('AVG(rating) as average_rating'), // Kolom 'rating' di tabel reviews Anda
+                DB::raw('COUNT(id) as total_reviews')      // Hitung total ID review yang masuk
+            )
+            ->first();
+
         // 3. Alirkan data menuju file Blade portfolio
-        return view('vendor.portfolio', compact('myPackages', 'vendorProfile'));
+        return view('vendor.portfolio', compact('myPackages', 'vendorProfile', 'ratingStats'));
     }
 }
