@@ -14,26 +14,27 @@
 </head>
 <body class="flex min-h-screen bg-[#f8f9fa] font-sans text-[#1a1a1a]">
 
+    <!-- Memanggil Sidebar Jurnalis -->
     @include('layouts.journalist_sidebar')
 
     <main class="flex-1 flex flex-col overflow-y-auto bg-[#f8f9fa]">
-        
         <header class="h-20 px-12 flex items-center justify-between sticky top-0 bg-white/80 backdrop-blur-md z-10 border-b border-gray-100">
             <h2 class="text-xl font-serif italic text-[#2d3e2d]">Journalist Profile</h2>
         </header>
 
         <div class="px-12 py-10 max-w-4xl mx-auto w-full">
             
+            <!-- Notifikasi Sukses -->
             @if(session('success'))
                 <div class="mb-8 p-4 bg-[#e1f5e1] text-[#2d4a22] rounded-xl text-sm font-semibold border border-[#2d4a22]/20">
                     {{ session('success') }}
                 </div>
             @endif
 
-            <div class="mb-8 flex items-center gap-6">
-                <!-- Foto Profil dengan efek Hover Kamera -->
+           <div class="mb-8 flex items-center gap-6">
+                <!-- Foto Profil dengan Hover Kamera -->
                 <div onclick="document.getElementById('profile_image').click()" class="w-24 h-24 rounded-full bg-gray-200 overflow-hidden border-4 border-white shadow-lg relative group cursor-pointer">
-                    <img src="{{ $profile->profile_image ? asset($profile->profile_image) : 'https://ui-avatars.com/api/?name='.urlencode($profile->full_name) }}" alt="Journalist Logo" class="w-full h-full object-cover">
+                    <img src="{{ !empty($profile->profile_image) ? asset($profile->profile_image) : 'https://ui-avatars.com/api/?name='.urlencode($profile->full_name ?? Auth::user()->name).'&background=2d3e2d&color=fff' }}" alt="Profile Avatar" class="w-full h-full object-cover">
                     <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                         <i data-lucide="camera" class="w-6 h-6 text-white"></i>
                     </div>
@@ -44,15 +45,17 @@
                 </div>
             </div>
 
+            <!-- Form Edit -->
             <form action="{{ route('journalist.profile.update') }}" method="POST" enctype="multipart/form-data" class="bg-white rounded-[2rem] p-10 shadow-sm border border-gray-50 space-y-6">
                 @csrf
                 
+                <!-- Input File Tersembunyi untuk Avatar -->
                 <input type="file" id="profile_image" name="profile_image" accept="image/*" class="hidden" />
 
                 <div class="grid grid-cols-2 gap-6">
                     <div class="col-span-2 md:col-span-1">
                         <label class="block text-[10px] font-bold tracking-widest text-gray-400 uppercase mb-2">Pen Name / Full Name</label>
-                        <input type="text" name="full_name" value="{{ old('full_name', $profile->full_name) }}" required
+                        <input type="text" name="full_name" value="{{ old('full_name', $profile->full_name ?? Auth::user()->name) }}" required
                                class="w-full bg-[#f0f2f0] border-transparent rounded-xl px-4 py-3 text-sm focus:border-[#2d3e2d] focus:ring-1 focus:ring-[#2d3e2d] outline-none">
                     </div>
                     
@@ -65,13 +68,13 @@
                     <div class="col-span-2">
                         <label class="block text-[10px] font-bold tracking-widest text-gray-400 uppercase mb-2">Author Bio</label>
                         <textarea name="bio" rows="4" placeholder="Tell readers about your journalistic experience..." 
-                                  class="w-full bg-[#f0f2f0] border-transparent rounded-xl px-4 py-3 text-sm focus:border-[#2d3e2d] focus:ring-1 focus:ring-[#2d3e2d] outline-none resize-none">{{ old('bio', $profile->bio) }}</textarea>
+                                  class="w-full bg-[#f0f2f0] border-transparent rounded-xl px-4 py-3 text-sm focus:border-[#2d3e2d] focus:ring-1 focus:ring-[#2d3e2d] outline-none resize-none">{{ old('bio', $profile->bio ?? '') }}</textarea>
                     </div>
 
                     <div class="col-span-2">
                         <label class="block text-[10px] font-bold tracking-widest text-gray-400 uppercase mb-2">Header Cover Image</label>
-                        @if($profile->header_image)
-                            <img src="{{ asset($profile->header_image) }}" alt="Header" class="w-full h-32 object-cover rounded-xl mb-4 opacity-80 border border-gray-200">
+                        @if(!empty($profile->header_image))
+                            <img src="{{ asset($profile->header_image) }}" alt="Header Cover" class="w-full h-32 object-cover rounded-xl mb-4 opacity-80 border border-gray-200">
                         @endif
                         <input type="file" name="header_image" accept="image/*" 
                                class="w-full bg-[#f0f2f0] border-transparent rounded-xl px-4 py-3 text-sm focus:border-[#2d3e2d] file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-[10px] file:font-bold file:uppercase file:tracking-widest file:bg-[#2d3e2d] file:text-white hover:file:bg-[#1e291e] cursor-pointer">
@@ -79,10 +82,10 @@
                 </div>
 
                 <div class="flex justify-end gap-4 pt-6 mt-6 border-t border-gray-100">
-                    <button type="reset" class="flex items-center justify-center gap-2 rounded-full border-2 border-[#2d4a22] bg-white px-6 py-2.5 text-sm font-bold text-[#2d4a22] transition-all hover:bg-[#2d4a22]/5 active:scale-95">
+                    <button type="reset" class="px-6 py-2.5 rounded-full border border-gray-200 text-gray-600 text-sm font-semibold hover:bg-gray-50 transition-colors">
                         Discard Changes
                     </button>
-                    <button type="submit" class="flex items-center justify-center gap-2 rounded-full bg-[#2d4a22] px-6 py-2.5 text-sm font-bold text-white shadow-md transition-all hover:bg-[#1e3317] active:scale-95">
+                    <button type="submit" class="px-6 py-2.5 rounded-full bg-[#2d4a22] text-white text-sm font-semibold hover:bg-[#1e3317] transition-colors shadow-sm">
                         Save Profile
                     </button>
                 </div>

@@ -71,7 +71,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/journalist/article/store', [ArticleController::class, 'store']) // Nanti kamu bikin fungsi store-nya ya!
     ->name('journalist.article.store');
     Route::get('/journalist/profile', [JournalistProfileController::class, 'edit'])->name('journalist.profile.edit');
-    Route::post('/journalist/profile', [ProfileController::class, 'update'])->name('journalist.profile.update');
+    Route::post('/journalist/profile', [JournalistProfileController::class, 'update'])->name('journalist.profile.update');
+    
     Route::get('/checkout/{id}', [CustomerBookingController::class, 'checkout'])->name('customer.checkout');
     
     // 2. RUTE POST: Untuk memproses simpan data pesanan (Sudah kita buat sebelumnya)

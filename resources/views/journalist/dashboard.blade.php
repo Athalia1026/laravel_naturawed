@@ -20,17 +20,33 @@
     @include('layouts.journalist_sidebar')
 
     <main class="flex-1 p-12 overflow-y-auto bg-[#f8f9fa]">
-        
-        <header class="flex justify-between items-start mb-8">
-            <div>
-                <h2 class="text-4xl font-serif text-[#2d3e2d] mb-2">Inspiration Articles</h2>
-                <p class="text-gray-500 text-sm">Manage your published editorial content and wedding inspirations.</p>
-            </div>
-            
-            <a href="{{ route('journalist.article.create') ?? '#' }}" class="flex items-center gap-2 px-6 py-3.5 bg-[#2a3f24] text-white rounded-xl text-xs font-bold tracking-widest uppercase hover:opacity-90 transition-all shadow-lg hover:shadow-xl active:scale-95">
-                <i data-lucide="plus" class="w-4 h-4"></i> Write Article
-            </a>
-        </header>
+    <!-- Tombol Logout di Kanan Atas -->
+   
+
+       <header class="flex items-start justify-between mb-8">
+    <!-- Bagian Kiri: Judul dan Deskripsi -->
+    <div>
+        <h2 class="text-3xl font-serif text-[#2d3e2d] mb-2">Inspiration Articles</h2>
+        <p class="text-gray-500 text-sm">Manage your published editorial content and wedding inspirations.</p>
+    </div>
+    
+    <!-- Bagian Kanan: Tombol-tombol -->
+    <div class="flex items-center gap-4">
+        <!-- Tombol Write Article -->
+        <a href="{{ route('journalist.article.create') }}" class="bg-[#2d4a22] text-white px-6 py-2.5 rounded-xl text-xs font-bold tracking-widest uppercase hover:bg-[#1e3317] transition-colors flex items-center gap-2 shadow-sm">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            Write Article
+        </a>
+
+        <!-- Tombol Logout Minimalis -->
+        <form method="POST" action="{{ route('logout') }}" class="m-0">
+            @csrf
+            <button type="submit" title="Logout" class="p-2.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-all flex items-center justify-center group">
+                <i data-lucide="log-out" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
+            </button>
+        </form>
+    </div>
+</header>
 
         <div class="flex items-center gap-4 mb-10">
             <div class="relative flex-1">
