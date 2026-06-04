@@ -73,9 +73,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/journalist/article/create', [ArticleController::class, 'create'])
     ->name('journalist.article.create');
 
-    Route::post('/journalist/article/store', [ArticleController::class, 'store']) // Nanti kamu bikin fungsi store-nya ya!
+    Route::post('/journalist/article/store', [ArticleController::class, 'store']) 
     ->name('journalist.article.store');
-    Route::get('/journalist/profile', [JournalistProfileController::class, 'edit'])->name('journalist.profile.edit');
+    // --- Rute Profile Jurnalis ---
+    // 1. Halaman Lihat Profil (Baru)
+    Route::get('/journalist/profile', [JournalistProfileController::class, 'show'])->name('journalist.profile.show');
+    
+    // 2. Halaman Form Edit
+    Route::get('/journalist/profile/edit', [JournalistProfileController::class, 'edit'])->name('journalist.profile.edit');
+    
+    // 3. Proses Update Data
     Route::post('/journalist/profile', [JournalistProfileController::class, 'update'])->name('journalist.profile.update');
     
     Route::get('/checkout/{id}', [CustomerBookingController::class, 'checkout'])->name('customer.checkout');
@@ -96,6 +103,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Review Routes
     Route::post('/reviews/store', [CustomerReviewController::class, 'store'])->name('customer.reviews.store');
+    // Rute untuk melihat detail artikel
+Route::get('/article/{id}', [\App\Http\Controllers\Customer\ArticleController::class, 'show'])->name('customer.article.show');
+
+// Rute untuk melihat profil jurnalis (Author) dari sisi customer
+Route::get('/author/{id}', [\App\Http\Controllers\Customer\ArticleController::class, 'authorProfile'])->name('customer.author.profile');
 });
 
 Route::get('/packages/{id}', [VendorPackageController::class, 'show'])->name('packages.show');

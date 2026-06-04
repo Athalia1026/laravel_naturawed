@@ -53,41 +53,45 @@
             </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-20 mb-24">
-            @forelse ($otherArticles as $article)
-                <a href="{{ route('customer.inspiration') }}?id={{ $article->id }}" class="group block cursor-pointer">
-                    <div class="relative aspect-[4/5] rounded-2xl overflow-hidden mb-6">
-                        <img 
-                            src="{{ $article->image_url ? asset($article->image_url) : 'https://picsum.photos/600/800' }}" 
-                            alt="{{ $article->title }}"
-                            class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                            referrerpolicy="no-referrer"
-                        />
-                        <button onclick="event.preventDefault();" class="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center text-zinc-900 shadow-sm hover:bg-white transition-colors">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>
-                        </button>
-                    </div>
-                    <h3 class="text-xl font-serif leading-snug mb-4 group-hover:text-zinc-600 transition-colors">
-                        {{ $article->title }}
-                    </h3>
-                    <div class="flex items-center space-x-3">
-                        <div class="w-8 h-8 rounded-full bg-zinc-200 overflow-hidden">
-                            <img src="https://ui-avatars.com/api/?name={{ urlencode($article->author_name) }}&background=random" alt="{{ $article->author_name }}" class="w-full h-full object-cover" />
-                        </div>
-                        <div class="text-[10px] tracking-wider uppercase font-semibold">
-                            <p class="text-zinc-900">{{ $article->author_name }}</p>
-                            <p class="text-zinc-400">{{ \Carbon\Carbon::parse($article->created_at)->format('d M Y') }}</p>
-                        </div>
-                    </div>
-                </a>
-            @empty
-                <div class="col-span-full py-16 text-center text-zinc-400">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-12 w-12 mb-4 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9.5L18.5 6M15 6v7H4" /></svg>
-                    <p class="text-lg font-serif">Belum ada artikel inspirasi lainnya.</p>
-                    <p class="text-sm mt-2">Jurnalis NaturaWed sedang menyiapkan karya terbaik mereka.</p>
+        <!-- Container Grid Utama: Membagi layar jadi 3 kolom menyamping -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-10">
+    
+    @forelse($otherArticles as $article)
+        <!-- Kartu Artikel (Bentuk Persegi Panjang Tidur Kecil) -->
+        <a href="{{ route('customer.article.show', $article->id ?? $article->id) ?? '#' }}" class="group bg-white rounded-[1.5rem] overflow-hidden border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col">
+            
+            <!-- Area Gambar: Dikunci tingginya (h-48) agar bentuknya memanjang (landscape) -->
+            <div class="h-48 w-full overflow-hidden relative shrink-0 bg-gray-100">
+                <img src="{{ !empty($article->image_url) ? asset($article->image_url) : 'https://picsum.photos/600/400' }}" 
+                     alt="{{ $article->title }}" 
+                     class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
+                
+                <!-- Tag Bookmark / Kategori di Kanan Atas -->
+                <div class="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-widest text-[#2d3e2d] shadow-sm">
+                    {{ $article->category ?? 'Editorial' }}
                 </div>
-            @endforelse
+            </div>
+
+            <!-- Area Teks Konten -->
+            <div class="p-6 flex flex-col justify-between flex-1">
+                <h3 class="text-xl font-serif text-gray-900 leading-snug mb-3 line-clamp-2 group-hover:text-[#2d4a22] transition-colors">
+                    {{ $article->title }}
+                </h3>
+                
+                <p class="text-[10px] font-bold tracking-widest text-gray-400 uppercase mt-auto">
+                    By {{ $article->author_name }} &nbsp;•&nbsp; 
+                    {{ \Carbon\Carbon::parse($article->created_at)->format('d M Y') }}
+                </p>
+            </div>
+        </a>
+    @empty
+        <!-- Pesan kalau belum ada artikel -->
+        <div class="col-span-3 py-12 text-center text-gray-500">
+            No inspiration articles available at the moment.
         </div>
+    @endforelse
+
+</div>
         
     </div>
 </main>
