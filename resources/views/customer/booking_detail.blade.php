@@ -88,7 +88,7 @@
                         <div class="flex-1">
                             <p class="text-[10px] uppercase text-zinc-500 font-semibold tracking-widest mb-1">Vendor & Package</p>
                             <h2 class="text-3xl font-serif mb-1">{{ $booking->package_name }}</h2>
-                            <p class="text-lg text-zinc-600 mb-4">by <span class="font-semibold text-[#2d4a22]">{{ $booking->business_name }}</span></p>
+                            <p class="text-lg text-zinc-600 mb-4">by <span class="font-semibold text-[#2d4a22]">{{ $booking->business_name ?: $booking->user_name }}</span></p>
                         </div>
                     </div>
                 </div>

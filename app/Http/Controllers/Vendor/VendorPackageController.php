@@ -178,9 +178,10 @@ class VendorPackageController extends Controller
     {
         $package = DB::table('packages as p')
             ->leftJoin('vendor_profiles as vp', 'p.vendor_id', '=', 'vp.id')
+            ->join('users as u', 'vp.user_id', '=', 'u.id')
             ->leftJoin('categories as c', 'p.category_id', '=', 'c.id')
             ->where('p.id', $id)
-            ->select('p.*', 'vp.business_name', 'vp.profile_image', 'c.name as category_name')
+            ->select('p.*', 'vp.business_name as profile_business_name', 'vp.profile_image', 'u.name as user_name', 'c.name as category_name')
             ->first();
 
         if (!$package) {
@@ -241,9 +242,10 @@ class VendorPackageController extends Controller
 
         $package = DB::table('packages as p')
             ->leftJoin('vendor_profiles as vp', 'p.vendor_id', '=', 'vp.id')
+            ->join('users as u', 'vp.user_id', '=', 'u.id')
             ->leftJoin('categories as c', 'p.category_id', '=', 'c.id')
             ->where('p.id', $id)
-            ->select('p.*', 'vp.business_name', 'c.name as category_name')
+            ->select('p.*', 'vp.business_name as profile_business_name', 'c.name as category_name', 'u.name as user_name')
             ->first();
 
         if (!$package) {

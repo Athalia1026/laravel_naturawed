@@ -158,13 +158,16 @@ class BookingController extends Controller
         $booking = DB::table('bookings as b')
             ->join('packages as p', 'b.package_id', '=', 'p.id')
             ->join('vendor_profiles as vp', 'p.vendor_id', '=', 'vp.id')
+            ->join('users as u', 'vp.user_id', '=', 'u.id')
             ->leftJoin('payments as pay', 'b.id', '=', 'pay.booking_id')
             ->where('b.id', $id)
             ->select(
-                'b.*',
+               'b.*',
                 'p.package_name',
                 'p.main_image',
-                'vp.business_name',
+              
+                'vp.business_name as vp_name', 
+                'u.name as user_name',
                 'pay.payment_proof',
                 'pay.status as payment_db_status'
             )
@@ -173,12 +176,12 @@ class BookingController extends Controller
         if (!$booking) {
             return abort(404, 'Booking not found.');
         }
-
+        $booking->business_name = $booking->vp_name ?: $booking->user_name;
         // Authorizasi: pastikan booking milik customer yang login
         if ($booking->customer_id !== $customerProfile->id) {
             return abort(403, 'Unauthorized access.');
         }
-
+      // dd($booking);
         // Mapping payment_status dari tabel bookings untuk konsistensi
         $booking->payment_status = $booking->payment_status ?? 'unpaid';
         $booking->booking_status = $booking->booking_status ?? 'pending_review';
