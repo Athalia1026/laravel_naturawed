@@ -15,4 +15,10 @@ class Article extends Model
         'content',
         'image_url',
     ];
+
+    // Mendaftarkan relasi bahwa 1 Artikel ini adalah MILIK 1 User (Jurnalis)
+    public function uploader()
+    {
+        return $this->belongsTo(User::class, 'journalist_id');
+    }
 }
