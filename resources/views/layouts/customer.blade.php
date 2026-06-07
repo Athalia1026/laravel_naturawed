@@ -174,17 +174,39 @@
                 @endauth
 
                 {{-- Chat --}}
+               {{-- Chat --}}
                 @auth
-                    <a href="#" class="hover:text-[#2d4a22] transition-colors">
-                @else
-                    <button type="button" @click="showAuthModal = true" class="hover:text-[#2d4a22] transition-colors bg-transparent border-none p-0 outline-none cursor-pointer">
-                @endauth
+                    @php
+                        // Hitung pesan chat yang belum dibaca untuk Customer
+                        $unreadChatCount = \Illuminate\Support\Facades\DB::table('messages')
+                            ->join('conversations', 'messages.conversation_id', '=', 'conversations.id')
+                            ->where(function($q) {
+                                $q->where('conversations.user_one', Auth::id())
+                                  ->orWhere('conversations.user_two', Auth::id());
+                            })
+                            ->where('messages.sender_id', '!=', Auth::id())
+                            ->whereNull('messages.read_at')
+                            ->count();
+                    @endphp
+
+                    <a href="{{ route('chat.index') }}" class="relative hover:text-[#2d4a22] transition-colors flex items-center justify-center">
                         <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
                         </svg>
-                @auth
+                        
+                        {{-- Indikator Red Dot Animasi Ping untuk Chat --}}
+                        @if($unreadChatCount > 0)
+                            <span class="absolute -top-1.5 -right-2 flex h-3 w-3">
+                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                                <span class="relative inline-flex rounded-full h-3 w-3 bg-red-500 border-2 border-white"></span>
+                            </span>
+                        @endif
                     </a>
                 @else
+                    <button type="button" @click="showAuthModal = true" class="hover:text-[#2d4a22] transition-colors bg-transparent border-none p-0 outline-none cursor-pointer">
+                        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                        </svg>
                     </button>
                 @endauth
 

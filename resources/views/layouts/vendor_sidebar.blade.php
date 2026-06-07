@@ -49,6 +49,50 @@
                 @endif
         </a>
 
+        {{-- Menu Messages dengan Notifikasi Unread --}}
+        @php
+            // Hitung total pesan yang belum dibaca khusus untuk user ini
+            $unreadChatCount = DB::table('messages')
+                ->join('conversations', 'messages.conversation_id', '=', 'conversations.id')
+                ->where(function($q) {
+                    $q->where('conversations.user_one', Auth::id())
+                      ->orWhere('conversations.user_two', Auth::id());
+                })
+                ->where('messages.sender_id', '!=', Auth::id())
+                ->whereNull('messages.read_at')
+                ->count();
+        @endphp
+
+        <a href="{{ route('chat.index') }}"
+            class="flex items-center gap-3 px-4 py-3 rounded-xl transition-colors text-sm font-medium relative 
+            {{ Route::is('chat.*') ? 'bg-[#f0f2f0] text-[#2d3e2d] font-semibold' : 'text-gray-500 hover:bg-gray-50' }}">
+            
+            <div class="relative flex items-center justify-center">
+                <i data-lucide="message-square" class="w-[18px] h-[18px]"></i>
+                
+                {{-- Indikator Red Dot Animasi Ping --}}
+                @if($unreadChatCount > 0)
+                    <span class="absolute -top-1 -right-1 flex h-2.5 w-2.5">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500 border border-white"></span>
+                    </span>
+                @endif
+            </div>
+
+            <span class="flex-1">Messages</span>
+
+            {{-- Angka jumlah pesan (Opsional, tampil jika ada) --}}
+            @if($unreadChatCount > 0)
+                <span class="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0">
+                    {{ $unreadChatCount }}
+                </span>
+            @endif
+
+            @if(Route::is('chat.*'))
+                <div class="absolute right-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-[#2d3e2d] rounded-l-full"></div>
+            @endif
+        </a>
+
 
 
         <div class="pt-6 mt-6 border-t border-gray-100">
