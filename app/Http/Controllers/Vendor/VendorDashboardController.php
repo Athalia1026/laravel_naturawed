@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use App\Models\Order;
 use App\Models\Package;
+use App\Models\ActivityLog;
 
 class VendorDashboardController extends Controller
 {
@@ -133,12 +134,15 @@ class VendorDashboardController extends Controller
     /**
      * Store vendor reply to a customer review
      */
-    public function reply(Request $request, $reviewId)
+public function reply(Request $request, $reviewId)
     {
         // Validation
         $request->validate([
             'vendor_reply' => 'required|string|max:1000',
         ]);
+
+        // 🌿 ACID IMPLEMENTATION: Memulai transaksi database sebelum operasi baca/tulis krusial
+        DB::beginTransaction();
 
         try {
             $userId = Auth::id();
@@ -149,6 +153,8 @@ class VendorDashboardController extends Controller
                 ->first();
 
             if (!$vendorProfile) {
+                // Batalkan transaksi jika profil tidak ditemukan sebelum melakukan lock/commit
+                DB::rollBack();
                 return redirect()->back()->with('error', 'Vendor profile not found.');
             }
 
@@ -159,6 +165,7 @@ class VendorDashboardController extends Controller
                 ->first();
 
             if (!$review) {
+                DB::rollBack();
                 return redirect()->back()->with('error', 'Review not found or does not belong to you.');
             }
 
@@ -169,12 +176,28 @@ class VendorDashboardController extends Controller
                     'vendor_reply' => $request->vendor_reply,
                     'replied_at' => now(),
                 ]);
+                
+                ActivityLog::create([
+                'user_id'    => $userId,
+                'activity'   => 'Vendor replied to customer review.',
+                'table_name' => 'reviews',
+                'record_id'  => $reviewId,
+                'details'    => json_encode([
+                    'review_rating' => $review->rating ?? 'No rating data',
+                    'reply_preview' => \Illuminate\Support\Str::limit($request->vendor_reply, 50)
+                ]),
+                'ip_address' => $request->ip()
+            ]);
+
+            // Jika update ulasan DAN pengisian log sukses, kunci data secara permanen
+            DB::commit();
 
             return redirect()->back()->with('success', 'Your reply has been posted successfully!');
 
         } catch (\Exception $e) {
+            // Jika salah satu proses di atas meledak/eror, kembalikan status database ke kondisi semula
+            DB::rollBack();
             return redirect()->back()->with('error', 'An error occurred: ' . $e->getMessage());
         }
-          
     }
 }

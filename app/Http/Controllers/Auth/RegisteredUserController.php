@@ -52,11 +52,23 @@ class RegisteredUserController extends Controller
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
                 'role' => $request->role,
+
+                'address' => [
+                $request->role === 'vendor' ? 'required' : 'nullable', 
+                'string', 
+                'max:500'
+            ],
             ]);
 
-            // Pecah data ke tabel profil sesuai Role
-           
-
+            if ($user->role === 'vendor') {
+                DB::table('vendor_profiles')->insert([
+                    'user_id'       => $user->id,
+                    'business_name' => $user->name, 
+                    'address' => $request->address,
+                    'created_at'    => now(),
+                    'updated_at'    => now()
+                ]);
+            }
             return $user;
         });
 
