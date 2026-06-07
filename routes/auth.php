@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\ChatController;
 use Illuminate\Support\Facades\Route;
 
 // ==========================================
@@ -29,5 +30,15 @@ Route::middleware('auth')->group(function () {
     
     // Rute untuk Logout
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
+    Route::get('/chat', [ChatController::class, 'index'])->name('chat.index');
+    Route::get('/chat/{id}', [ChatController::class, 'show'])->name('chat.show');
+    Route::post('/chat/send', [ChatController::class, 'send'])->name('chat.send');
     
+    // Rute inisiasi chat dari tombol "Message Vendor"
+    Route::post('/chat/start/{vendor_id}', [ChatController::class, 'start'])->name('chat.start');
+});
+
+// Tambahkan khusus untuk Vendor (opsional jika ingin dipisah)
+Route::middleware(['auth', 'role:vendor'])->prefix('vendor')->group(function () {
+    Route::get('/messages', [ChatController::class, 'index'])->name('vendor.messages');
 });
