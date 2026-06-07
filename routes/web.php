@@ -55,6 +55,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/vendor/packages/update', [VendorPackageController::class, 'update'])->name('vendor.packages.update');
     Route::delete('/vendor/packages/{id}', [VendorPackageController::class, 'delete'])->name('vendor.packages.delete');
 
+    Route::get('/vendor/bookings', [VendorBookingController::class, 'index'])->name('vendor.bookings.index');
+
     // Vendor Booking Approval Routes
     Route::post('/vendor/bookings/{id}/approve', [VendorBookingController::class, 'approve'])->name('vendor.bookings.approve');
     Route::post('/vendor/bookings/{id}/reject', [VendorBookingController::class, 'reject'])->name('vendor.bookings.reject');
