@@ -278,6 +278,8 @@ class VendorPackageController extends Controller
             return abort(404, 'Maaf, paket pernikahan tidak ditemukan.');
         }
 
+        $package->business_name = $package->business_name ?: $package->user_name;
+        
         $reviewsQuery = DB::table('reviews as r')
             ->join('bookings as b', 'r.booking_id', '=', 'b.id')
             ->join('customer_profiles as cp', 'r.customer_id', '=', 'cp.id')
@@ -305,7 +307,7 @@ class VendorPackageController extends Controller
             
             return $review;
         });
-
+         
         return view('customer.package_detail', compact('package', 'reviews', 'averageRating', 'totalReviews'));
     }
 

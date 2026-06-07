@@ -14,8 +14,9 @@ class HomeController extends Controller
         $ecoPackages = DB::table('packages as p')
             ->leftJoin('vendor_profiles as vp', 'p.vendor_id', '=', 'vp.id')
             ->leftJoin('categories as c', 'p.category_id', '=', 'c.id')
+            ->join('users as u', 'vp.user_id', '=', 'u.id')
             ->where('p.status', 'active')
-            ->select('p.*', 'vp.business_name', 'c.name as category_name')
+            ->select('p.*', 'vp.business_name', 'u.name as user_name', 'c.name as category_name')
             ->orderBy('p.created_at', 'desc')
             ->take(6)
             ->get();

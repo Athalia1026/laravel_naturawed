@@ -45,6 +45,6 @@ class VendorPortfolioController extends Controller
         }
 
         // 3. Alirkan data menuju file Blade portfolio (Data dipastikan 100% aman untuk memicu @empty di Blade)
-        return view('vendor.portfolio', compact('myPackages', 'vendorProfile', 'ratingStats'));
+        return view('vendor.portfolio', compact('myPackages', 'vendorProfile', 'vendorId', 'ratingStats'));
     }
 }

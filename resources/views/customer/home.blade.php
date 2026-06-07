@@ -50,7 +50,7 @@
                                 </div>
                                 
                                 <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mt-3">
-                                    By <span class="text-[#2d4a22]">{{ $item->business_name }}</span>
+                                    By <span class="text-[#2d4a22]">{{ $item->business_name ?: $item->user_name ?? 'Unknown Vendor' }}</span>
                                 </span>
                                 
                                 <p class="mt-4 text-sm leading-relaxed text-gray-500 line-clamp-2">

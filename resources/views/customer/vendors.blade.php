@@ -85,7 +85,7 @@
                                 <span>🌿 By
                                     <span onclick="event.preventDefault(); event.stopPropagation(); window.location.href='{{ route('vendor.show', ['id' => $pkg->vendor_id]) }}';" 
                                         class="text-[#2d4a22] font-semibold hover:underline hover:text-amber-700 transition-colors cursor-pointer">
-                                        {{ $pkg->business_name ?? 'NaturaWed Vendor' }}
+                                        {{ $pkg->business_name ?: $pkg->user_name ?? 'Unknown Vendor' }}
                                     </span>
                                 </span>
                             </div>

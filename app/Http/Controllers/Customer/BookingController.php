@@ -190,7 +190,7 @@ class BookingController extends Controller
         if (!$booking) {
             return abort(404, 'Booking not found.');
         }
-
+        
         $booking->business_name = $booking->vp_name ?: $booking->user_name;
 
         if ($booking->customer_id !== $customerProfile->id) {
