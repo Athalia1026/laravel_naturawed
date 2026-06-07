@@ -108,8 +108,8 @@
 <script>
     // Menampilkan Interaksi Nama Dokumen Unggahan
     document.getElementById('fileInput').onchange = function() {
-        if (this.files && this.files) { 
-            document.getElementById('fileName').innerHTML = `Selected: <strong class="text-[#2d4a22]">${this.files.name}</strong>`;
+        if (this.files && this.files[0]) { 
+            document.getElementById('fileName').innerHTML = `Selected: <strong class="text-[#2d4a22]">${this.files[0].name}</strong>`;
         } else {
             document.getElementById('fileName').innerHTML = `📸 Click to select transfer receipt`;
         }
