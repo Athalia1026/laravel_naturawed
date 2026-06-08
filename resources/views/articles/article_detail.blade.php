@@ -2,7 +2,7 @@
     $pageTitle = ($article['title'] ?? 'Article') . " - NaturaWed";
 @endphp
 
-@include('layouts.header')
+@include('layouts.includes.header')
 
 <div class="bg-[#faf9f6] min-h-screen"> 
     <div class="relative w-full h-[80vh] overflow-hidden">

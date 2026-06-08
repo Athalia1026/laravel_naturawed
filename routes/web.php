@@ -60,8 +60,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/journalist/article/create', [ArticleController::class, 'create'])
     ->name('journalist.article.create');
 
-    Route::post('/journalist/article/store', [ArticleController::class, 'store']) // Nanti kamu bikin fungsi store-nya ya!
+    Route::post('/journalist/article/store', [ArticleController::class, 'store']) 
     ->name('journalist.article.store');
+
+    Route::get('/customer/inspiration', [ArticleController::class, 'inspiration'])
+    ->name('inspiration');
+ 
+    Route::get('/articles/{id}', [App\Http\Controllers\Journalist\ArticleController::class, 'show'])
+    ->name('articles.show');
 
     Route::get('/checkout/{id}', [CustomerBookingController::class, 'checkout'])->name('customer.checkout');
     
