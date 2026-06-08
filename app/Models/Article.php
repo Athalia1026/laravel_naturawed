@@ -17,7 +17,7 @@ class Article extends Model
     ];
 
     // Mendaftarkan relasi bahwa 1 Artikel ini adalah MILIK 1 User (Jurnalis)
-    public function uploader()
+    public function journalist()
     {
         return $this->belongsTo(User::class, 'journalist_id');
     }

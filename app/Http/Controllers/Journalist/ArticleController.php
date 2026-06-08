@@ -48,7 +48,7 @@ class ArticleController extends Controller
 
     // Untuk Detail Artikel (Shared oleh Jurnalis & Customer)
     public function show($id) {
-        $article = Article::findOrFail($id);
+        $article = Article::with(['journalist.journalistProfile'])->findOrFail($id);
         return view('articles.article_detail', compact('article'));
     }
 
@@ -101,5 +101,13 @@ class ArticleController extends Controller
             return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage())->withInput();
         }
     }
+
+    public function authorProfile($id)
+{
+    $author = \App\Models\User::with('journalistProfile')->findOrFail($id);
+    $articles = \App\Models\Article::where('journalist_id', $id)->latest()->get();
+    
+    return view('customer.author_profile', compact('author', 'articles'));
+}
     
 }
