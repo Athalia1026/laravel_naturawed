@@ -17,6 +17,7 @@ use App\Http\Controllers\Customer\CustomerReviewController;
 use App\Http\Controllers\Customer\VendorDisplayController;
 use App\Http\Controllers\Journalist\ProfileController as JournalistProfileController;
 use App\Http\Controllers\Vendor\AnalyticsController;
+use App\Http\Controllers\ChatController;
 
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -54,7 +55,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/vendor/packages/{id}/edit', [VendorPackageController::class, 'edit'])->name('vendor.packages.edit');
     Route::post('/vendor/packages/update', [VendorPackageController::class, 'update'])->name('vendor.packages.update');
 
-        
+
     Route::delete('/vendor/packages/{id}', [VendorPackageController::class, 'destroy'])->name('vendor.packages.destroy');
 
     Route::get('/vendor/bookings', [VendorBookingController::class, 'index'])->name('vendor.bookings.index');
@@ -70,58 +71,69 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/vendor/analytics', [AnalyticsController::class, 'index'])->name('vendor.analytics');
     Route::get('/vendor/analytics/export-pdf', [AnalyticsController::class, 'exportPdf'])->name('vendor.analytics.pdf');
 
-///JOURNALIST
+    ///JOURNALIST
     Route::get('/journalist/dashboard', [ArticleController::class, 'dashboard'])
-    ->name('journalist.dashboard');
+        ->name('journalist.dashboard');
 
     Route::get('/journalist/article/create', [ArticleController::class, 'create'])
-    ->name('journalist.article.create');
+        ->name('journalist.article.create');
 
-    Route::post('/journalist/article/store', [ArticleController::class, 'store']) 
-    ->name('journalist.article.store');
+    Route::post('/journalist/article/store', [ArticleController::class, 'store'])
+        ->name('journalist.article.store');
 
     Route::get('/customer/inspiration', [ArticleController::class, 'inspiration'])
-    ->name('inspiration');
- 
+        ->name('inspiration');
+
     Route::get('/articles/{id}', [App\Http\Controllers\Journalist\ArticleController::class, 'show'])
-    ->name('articles.show');
+        ->name('articles.show');
 
     // --- Rute Profile Jurnalis ---
     // 1. Halaman Lihat Profil (Baru)
     Route::get('/journalist/profile', [JournalistProfileController::class, 'show'])->name('journalist.profile.show');
-    
+
     // 2. Halaman Form Edit
     Route::get('/journalist/profile/edit', [JournalistProfileController::class, 'edit'])->name('journalist.profile.edit');
-    
+
     // 3. Proses Update Data
     Route::post('/journalist/profile', [JournalistProfileController::class, 'update'])->name('journalist.profile.update');
-    
+
     Route::get('/checkout/{id}', [CustomerBookingController::class, 'checkout'])->name('customer.checkout');
-    
+
     // 2. RUTE POST: Untuk memproses simpan data pesanan (Sudah kita buat sebelumnya)
     Route::post('/bookings', [CustomerBookingController::class, 'store'])->name('customer.bookings.store');
 
     // Tampilan Instruksi Pembayaran Paket
     Route::get('/payment-instruction', [CustomerPaymentController::class, 'showPayment'])->name('customer.payment.show');
-    
+
     // Endpoint AJAX POST Penampung Unggah Bukti Transfer
     Route::post('/payment-submit', [CustomerPaymentController::class, 'store'])->name('customer.payment.submit');
 
     Route::get('/history', [CustomerBookingController::class, 'history'])->name('customer.bookings.history');
-    
+
     // Booking Detail Route
     Route::get('/bookings/{id}', [CustomerBookingController::class, 'show'])->name('customer.bookings.show');
 
     // Review Routes
     Route::post('/reviews/store', [CustomerReviewController::class, 'store'])->name('customer.reviews.store');
     // Rute untuk melihat detail artikel
-Route::get('/article/{id}', [\App\Http\Controllers\Customer\ArticleController::class, 'show'])->name('customer.article.show');
+    Route::get('/article/{id}', [\App\Http\Controllers\Customer\ArticleController::class, 'show'])->name('customer.article.show');
 
-// Rute untuk melihat profil jurnalis (Author) dari sisi customer
-Route::get('/author/{id}', [\App\Http\Controllers\Customer\ArticleController::class, 'authorProfile'])->name('customer.author.profile');
+    // Rute untuk melihat profil jurnalis (Author) dari sisi customer
+    Route::get('/author/{id}', [\App\Http\Controllers\Customer\ArticleController::class, 'authorProfile'])->name('customer.author.profile');
+
+    // Halaman utama chat (Inbox) -> memanggil ChatController fungsi index
+    Route::get('/chat', [ChatController::class, 'index'])->name('chat.index');
+
+    // Ruang chat aktif berdasarkan ID -> memanggil ChatController fungsi show
+    Route::get('/chat/{id}', [ChatController::class, 'show'])->name('chat.show');
+
+    // Aksi untuk mengirim pesan baru
+    Route::post('/chat/send', [ChatController::class, 'send'])->name('chat.send');
+    // Catatan: Jika di controller Anda nama fungsinya adalah 'store', ganti 'send' di atas menjadi 'store'
 });
 
 Route::get('/packages/{id}', [VendorPackageController::class, 'show'])->name('packages.show');
 Route::get('/packages/{id}/checkout', [VendorPackageController::class, 'checkout'])->name('packages.checkout');
 Route::get('/vendor-detail/{id}', [VendorDisplayController::class, 'show'])->name('vendor.show');
-Route::get('/about', function () {return view('customer.about');})->name('customer.about');
+Route::get('/about', function () {
+    return view('customer.about'); })->name('customer.about');
