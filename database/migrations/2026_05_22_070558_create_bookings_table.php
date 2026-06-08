@@ -17,9 +17,10 @@ return new class extends Migration
         $table->foreignId('package_id')->constrained('packages')->cascadeOnDelete();
         $table->date('event_date');
         $table->text('event_location');
+        $table->integer('estimated_guests')->nullable();
         $table->text('notes')->nullable();
         $table->decimal('total_price', 15, 2);
-        $table->enum('status', ['pending', 'confirmed', 'completed', 'cancelled'])->default('pending');
+        $table->string('booking_status', 50)->default('pending_review');
         $table->timestamps();
     });
 }

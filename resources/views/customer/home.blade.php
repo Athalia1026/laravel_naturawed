@@ -36,7 +36,7 @@
                 <div id="ecoCarousel" class="flex overflow-x-auto gap-6 pb-12 pt-4 px-4 hide-scrollbar">
                     
                     @foreach ($ecoPackages as $item)
-                        <a href="#" class="group relative flex-none w-[340px] overflow-hidden rounded-[2rem] bg-white shadow-xl shadow-gray-200/50 transition-transform duration-300 hover:-translate-y-2 snap-start border border-gray-50">
+                        <a href="{{ route('packages.show', ['id' => $item->id]) }}" class="group relative flex-none w-[340px] overflow-hidden rounded-[2rem] bg-white shadow-xl shadow-gray-200/50 transition-transform duration-300 hover:-translate-y-2 snap-start border border-gray-50">
                             <img src="{{ $item->main_image ?: 'https://picsum.photos/400/300' }}" 
                                  alt="{{ $item->package_name }}" 
                                  class="h-64 w-full object-cover transition-transform duration-700 group-hover:scale-105" 
@@ -50,7 +50,7 @@
                                 </div>
                                 
                                 <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mt-3">
-                                    By <span class="text-[#2d4a22]">{{ $item->business_name }}</span>
+                                    By <span class="text-[#2d4a22]">{{ $item->business_name ?: $item->user_name ?? 'Unknown Vendor' }}</span>
                                 </span>
                                 
                                 <p class="mt-4 text-sm leading-relaxed text-gray-500 line-clamp-2">
@@ -96,11 +96,13 @@
 
     <section class="bg-white px-12 py-16">
         <h2 class="mb-12 text-4xl font-bold text-gray-900">Most Recommended Vendors</h2>
+        
         <div class="grid grid-cols-1 gap-8 md:grid-cols-3">
-            @foreach ($recommendedVendors as $item)
-                <a href="#" class="group block overflow-hidden rounded-3xl shadow-2xl transition-transform duration-300 hover:scale-105">
-                    <img src="{{ $item['img'] }}" alt="{{ $item['name'] }}" class="h-64 w-full object-cover" referrerpolicy="no-referrer" />
-                    <div class="bg-[#800000] p-8 text-white">
+            @forelse ($recommendedVendors as $item)
+                <a href="#" class="group flex flex-col h-full overflow-hidden rounded-3xl shadow-2xl transition-transform duration-300 hover:scale-105">
+                    <img src="{{ $item['img'] }}" alt="{{ $item['name'] }}" class="h-64 w-full object-cover shrink-0" referrerpolicy="no-referrer" />
+                    
+                    <div class="bg-[#800000] p-8 text-white flex-1 flex flex-col">
                         <h3 class="text-2xl font-bold">{{ $item['name'] }}</h3>
                         <div class="mt-2 flex items-center space-x-1">
                             @for ($i = 0; $i < 4; $i++)
@@ -111,15 +113,24 @@
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-300">
                                 <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
                             </svg>
-                            <span class="text-xs opacity-80 pl-1">(4.0)</span>
+                            <span class="text-xs opacity-80 pl-1">({{ $item['rating'] }})</span>
                         </div>
                         <p class="mt-4 text-sm leading-relaxed opacity-90 line-clamp-2">
                             {{ $item['review'] }}
                         </p>
-                        <div class="mt-4 text-xs font-bold uppercase tracking-widest opacity-70">by {{ $item['author'] }}</div>
+                        
+                        <div class="mt-auto pt-4 text-xs font-bold uppercase tracking-widest opacity-70">by {{ $item['author'] }}</div>
                     </div>
                 </a>
-            @endforeach
+            @empty
+                <div class="col-span-1 md:col-span-3 flex flex-col items-center justify-center bg-gray-50 border-2 border-dashed border-gray-200 rounded-[2rem] py-20 px-8 text-center transition-all hover:bg-gray-100">
+                    <div class="text-6xl mb-4 text-gray-400 font-bold">:(</div>
+                    <h3 class="text-2xl font-bold text-gray-700 mb-2">No Recommended Vendors Yet</h3>
+                    <p class="text-gray-500 max-w-md">
+                        Belum ada vendor yang mendapatkan rating ulasan memadai saat ini. Jadilah pelanggan pertama yang memesan dan berikan ulasan terbaikmu!
+                    </p>
+                </div>
+            @endforelse
         </div>
     </section>
 

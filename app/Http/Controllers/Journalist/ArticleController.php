@@ -6,6 +6,8 @@ use App\Models\Article;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\DB;      // WAJIB DITAMBAHKAN UNTUK ACID
+use Illuminate\Support\Facades\Storage; // WAJIB DITAMBAHKAN UNTUK HAPUS GAMBAR
 
 class ArticleController extends Controller
 {
@@ -36,6 +38,7 @@ class ArticleController extends Controller
         return view('journalist.write_article');
     }
 
+
     // Untuk Detail Artikel (Shared oleh Jurnalis & Customer)
     public function show($id) {
         $article = Article::findOrFail($id);
@@ -44,7 +47,7 @@ class ArticleController extends Controller
 
     public function store(Request $request) 
     {
-        // 1. Validasi input formulir
+       
         $request->validate([
             'title'       => 'required|string|max:255',
             'author'      => 'required|string|max:100',
@@ -52,8 +55,8 @@ class ArticleController extends Controller
             'content'     => 'required|string',
             'cover_image' => 'required|image|mimes:jpeg,png,jpg,webp|max:2048', // Maksimal 2MB
         ]);
-
-        // 2. Proses unggah gambar
+        
+        
         $imageUrl = null;
         if ($request->hasFile('cover_image')) {
             // Simpan gambar ke folder storage/app/public/articles
@@ -61,6 +64,11 @@ class ArticleController extends Controller
             // Format URL agar bisa diakses dari public
             $imageUrl = '/storage/' . $imagePath;
         }
+        
+         DB::beginTransaction(); // Kunci database, mulai proses transaksi
+
+        try {
+         
 
         // 3. Simpan data ke database
         Article::create([
@@ -72,8 +80,28 @@ class ArticleController extends Controller
             'content'       => $request->content,
         ]);
 
+            // Jika eksekusi berhasil sampai sini, permanenkan data ke database! (DURABILITY)
+            DB::commit();
+
+            return redirect()->route('journalist.dashboard')
+                             ->with('success', 'Artikel inspirasi berhasil dipublikasikan!');
+
+        } catch (\Exception $e) {
+           
+            DB::rollBack();
+
+           
+            if ($imagePath) {
+                Storage::disk('public')->delete($imagePath);
+            }
+
+            // Kembalikan ke halaman form dengan pesan error
+            return back()->with('error', 'Terjadi kesalahan saat menyimpan data: ' . $e->getMessage())->withInput();
+        }
         // 4. Kembali ke dashboard dengan pesan sukses
         return redirect()->route('journalist.dashboard')->with('success', 'Article published successfully!');
+
+        
     }
     
 }

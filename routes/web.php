@@ -7,18 +7,25 @@ use App\Http\Controllers\Vendor\VendorPortfolioController;
 use App\Http\Controllers\Vendor\VendorProfileController;
 use App\Http\Controllers\Vendor\VendorPackageController;
 use App\Http\Controllers\Vendor\VendorBookingController;
+use App\Http\Controllers\Vendor\VendorReviewController;
 use App\Http\Controllers\Journalist\ArticleController;
 use App\Http\Controllers\Customer\HomeController;
 use App\Http\Controllers\Customer\VendorController as CustomerVendorController;
 use App\Http\Controllers\Customer\BookingController as CustomerBookingController;
 use App\Http\Controllers\Customer\PaymentController as CustomerPaymentController;
+use App\Http\Controllers\Customer\CustomerReviewController;
+use App\Http\Controllers\Customer\VendorDisplayController;
+use App\Http\Controllers\Journalist\ProfileController as JournalistProfileController;
+use App\Http\Controllers\Vendor\AnalyticsController;
+
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
 Route::get('/vendors', [CustomerVendorController::class, 'index'])->name('customer.vendors');
 
 Route::get('/packages/{id}', [VendorPackageController::class, 'show'])->name('packages.show');
-
+// Rute Publik untuk Halaman Inspirasi
+Route::get('/inspiration', [App\Http\Controllers\Journalist\ArticleController::class, 'index'])->name('customer.inspiration');
 
 require __DIR__ . '/auth.php';
 
@@ -32,8 +39,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/vendor/dashboard', [VendorDashboardController::class, 'index'])
         ->name('vendor.dashboard');
 
-    Route::get('/vendor/portfolio', [VendorPortfolioController::class, 'index'])
-        ->name('vendor.portfolio');
+    Route::get('/vendor/portfolio', [VendorPortfolioController::class, 'index'])->name('vendor.portfolio');
 
     Route::get('/vendor/profile', [VendorProfileController::class, 'edit'])
         ->name('profile.edit');
@@ -49,9 +55,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/vendor/packages/update', [VendorPackageController::class, 'update'])->name('vendor.packages.update');
     Route::delete('/vendor/packages/{id}', [VendorPackageController::class, 'delete'])->name('vendor.packages.delete');
 
+    Route::get('/vendor/bookings', [VendorBookingController::class, 'index'])->name('vendor.bookings.index');
+
     // Vendor Booking Approval Routes
     Route::post('/vendor/bookings/{id}/approve', [VendorBookingController::class, 'approve'])->name('vendor.bookings.approve');
     Route::post('/vendor/bookings/{id}/reject', [VendorBookingController::class, 'reject'])->name('vendor.bookings.reject');
+
+    // Vendor Review Routes
+    Route::get('/vendor/reviews', [VendorReviewController::class, 'index'])->name('vendor.reviews.index');
+    Route::post('/vendor/reviews/{id}/reply', [VendorDashboardController::class, 'reply'])->name('vendor.reviews.reply');
+
+    Route::get('/vendor/analytics', [AnalyticsController::class, 'index'])->name('vendor.analytics');
+    Route::get('/vendor/analytics/export-pdf', [AnalyticsController::class, 'exportPdf'])->name('vendor.analytics.pdf');
 
 ///JOURNALIST
     Route::get('/journalist/dashboard', [ArticleController::class, 'dashboard'])
@@ -69,6 +84,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/articles/{id}', [App\Http\Controllers\Journalist\ArticleController::class, 'show'])
     ->name('articles.show');
 
+    // --- Rute Profile Jurnalis ---
+    // 1. Halaman Lihat Profil (Baru)
+    Route::get('/journalist/profile', [JournalistProfileController::class, 'show'])->name('journalist.profile.show');
+    
+    // 2. Halaman Form Edit
+    Route::get('/journalist/profile/edit', [JournalistProfileController::class, 'edit'])->name('journalist.profile.edit');
+    
+    // 3. Proses Update Data
+    Route::post('/journalist/profile', [JournalistProfileController::class, 'update'])->name('journalist.profile.update');
+    
     Route::get('/checkout/{id}', [CustomerBookingController::class, 'checkout'])->name('customer.checkout');
     
     // 2. RUTE POST: Untuk memproses simpan data pesanan (Sudah kita buat sebelumnya)
@@ -84,7 +109,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
     
     // Booking Detail Route
     Route::get('/bookings/{id}', [CustomerBookingController::class, 'show'])->name('customer.bookings.show');
+
+    // Review Routes
+    Route::post('/reviews/store', [CustomerReviewController::class, 'store'])->name('customer.reviews.store');
+    // Rute untuk melihat detail artikel
+Route::get('/article/{id}', [\App\Http\Controllers\Customer\ArticleController::class, 'show'])->name('customer.article.show');
+
+// Rute untuk melihat profil jurnalis (Author) dari sisi customer
+Route::get('/author/{id}', [\App\Http\Controllers\Customer\ArticleController::class, 'authorProfile'])->name('customer.author.profile');
 });
 
 Route::get('/packages/{id}', [VendorPackageController::class, 'show'])->name('packages.show');
 Route::get('/packages/{id}/checkout', [VendorPackageController::class, 'checkout'])->name('packages.checkout');
+Route::get('/vendor-detail/{id}', [VendorDisplayController::class, 'show'])->name('vendor.show');
+Route::get('/about', function () {return view('customer.about');})->name('customer.about');

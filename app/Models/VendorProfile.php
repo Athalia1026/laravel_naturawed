@@ -12,6 +12,13 @@ class VendorProfile extends Model
         'user_id',
         'business_name',
         'address',
+        'instagram',
+        'website',
+        'cover_image',
+        'profile_image',
+        'team_image',
+        'team_description',
+        'bio',
     ];
 
     /**
@@ -27,5 +34,13 @@ class VendorProfile extends Model
     public function packages()
     {
         return $this->hasMany(Package::class, 'vendor_id');
+    }
+    /**
+     * Relasi ke model Review.
+     * Satu profil vendor bisa memiliki banyak review dari customer.
+     */
+    public function reviews()
+    {
+        return $this->hasMany(Review::class, 'vendor_id');
     }
 }

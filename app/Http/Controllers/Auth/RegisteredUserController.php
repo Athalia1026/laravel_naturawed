@@ -52,17 +52,23 @@ class RegisteredUserController extends Controller
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
                 'role' => $request->role,
+
+                'address' => [
+                $request->role === 'vendor' ? 'required' : 'nullable', 
+                'string', 
+                'max:500'
+            ],
             ]);
 
-            // Pecah data ke tabel profil sesuai Role
-            if ($request->role === 'vendor') {
-                VendorProfile::create(['user_id' => $user->id, 'business_name' => $request->name]);
-            } elseif ($request->role === 'journalist') {
-                JournalistProfile::create(['user_id' => $user->id, 'full_name' => $request->name]);
-            } else {
-                CustomerProfile::create(['user_id' => $user->id, 'full_name' => $request->name]);
+            if ($user->role === 'vendor') {
+                DB::table('vendor_profiles')->insert([
+                    'user_id'       => $user->id,
+                    'business_name' => $user->name, 
+                    'address' => $request->address,
+                    'created_at'    => now(),
+                    'updated_at'    => now()
+                ]);
             }
-
             return $user;
         });
 
@@ -75,9 +81,10 @@ class RegisteredUserController extends Controller
         if ($user->role === 'vendor') {
             return redirect()->intended('/vendor/dashboard'); // Sesuaikan URL rute Anda
         } elseif ($user->role === 'journalist') {
-            return redirect()->intended('/journalist-dashboard');
+            return redirect()->intended('/journalist/dashboard');
+        } else {
+            // Jika rolenya customer ATAU tidak terdeteksi, lempar ke halaman utama (home)
+            return redirect()->intended('/');
         }
-
-        return redirect()->intended('/');
     }
 }

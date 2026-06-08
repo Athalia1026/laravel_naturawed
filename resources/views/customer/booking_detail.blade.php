@@ -88,7 +88,7 @@
                         <div class="flex-1">
                             <p class="text-[10px] uppercase text-zinc-500 font-semibold tracking-widest mb-1">Vendor & Package</p>
                             <h2 class="text-3xl font-serif mb-1">{{ $booking->package_name }}</h2>
-                            <p class="text-lg text-zinc-600 mb-4">by <span class="font-semibold text-[#2d4a22]">{{ $booking->business_name }}</span></p>
+                            <p class="text-lg text-zinc-600 mb-4">by <span class="font-semibold text-[#2d4a22]">{{ $booking->business_name ?: $booking->user_name }}</span></p>
                         </div>
                     </div>
                 </div>
@@ -134,6 +134,101 @@
                             "{{ $booking->notes }}"
                         </p>
                     </div>
+                @endif
+
+                <!-- Leave a Review Form -->
+                @if($booking->payment_status === 'success' && !$hasReview)
+                    <div class="bg-white rounded-3xl p-8 border border-zinc-200 shadow-sm">
+                        <p class="text-[10px] uppercase text-zinc-500 font-semibold tracking-widest mb-6">Leave a Review</p>
+                        
+                        <form action="{{ route('customer.reviews.store') }}" method="POST" class="space-y-6">
+                            @csrf
+                            <input type="hidden" name="booking_id" value="{{ $booking->id }}">
+
+                            <!-- Rating Selection -->
+                          <div class="mb-6">
+                                <label class="block text-[10px] font-bold tracking-widest text-gray-400 uppercase mb-3">Overall Rating</label>
+                                
+                                <input type="hidden" name="rating" id="rating-value" value="0" required>
+                                
+                                <div class="flex items-center gap-2 cursor-pointer" id="star-rating-container">
+                                    <svg class="w-8 h-8 text-gray-300 fill-transparent star-icon transition-colors" data-value="1" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                                    </svg>
+                                    <svg class="w-8 h-8 text-gray-300 fill-transparent star-icon transition-colors" data-value="2" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                                    </svg>
+                                    <svg class="w-8 h-8 text-gray-300 fill-transparent star-icon transition-colors" data-value="3" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                                    </svg>
+                                    <svg class="w-8 h-8 text-gray-300 fill-transparent star-icon transition-colors" data-value="4" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                                    </svg>
+                                    <svg class="w-8 h-8 text-gray-300 fill-transparent star-icon transition-colors" data-value="5" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                                    </svg>
+                                </div>
+                            </div>
+
+                            <script>
+                                document.addEventListener('DOMContentLoaded', function() {
+                                    const stars = document.querySelectorAll('.star-icon');
+                                    const ratingInput = document.getElementById('rating-value');
+
+                                    stars.forEach(star => {
+                                        star.addEventListener('click', function() {
+                                            const value = this.getAttribute('data-value');
+                                            ratingInput.value = value; 
+
+                                            // Reset semua bintang ke abu-abu transparan
+                                            stars.forEach(s => {
+                                                s.classList.remove('text-yellow-400', 'fill-yellow-400');
+                                                s.classList.add('text-gray-300', 'fill-transparent');
+                                            });
+
+                                            // Warnai bintang jadi kuning pekat sampai batas yang diklik
+                                            for(let i = 0; i < value; i++) {
+                                                stars[i].classList.remove('text-gray-300', 'fill-transparent');
+                                                stars[i].classList.add('text-yellow-400', 'fill-yellow-400');
+                                            }
+                                        });
+                                    });
+                                });
+                            </script>
+                                
+                            <!-- Comment Field -->
+                            <div>
+                                <label class="block text-[10px] uppercase text-zinc-500 font-semibold tracking-widest mb-3">Your Comment (Optional)</label>
+                                <textarea name="comment" 
+                                          placeholder="Share your experience with this vendor. What did they do well? Any suggestions for improvement?"
+                                          maxlength="1000"
+                                          class="w-full bg-[#f9f8f3] border border-zinc-200 rounded-2xl px-4 py-3 text-sm focus:ring-2 focus:ring-[#2d4a22]/20 focus:bg-white outline-none transition-all resize-none h-32">{{ old('comment') }}</textarea>
+                                <p class="text-xs text-zinc-400 mt-2"><span id="char_count">0</span>/1000 characters</p>
+                                @error('comment')
+                                    <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <!-- Submit Button -->
+                            <div class="flex gap-3 pt-4">
+                                <button type="submit" class="flex-1 bg-[#2d4a22] hover:bg-[#1e3317] text-white font-bold py-3 px-6 rounded-2xl transition-all duration-200 shadow-md hover:shadow-lg">
+                                    Submit Review
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <script>
+                        // Character counter for textarea
+                        const commentField = document.querySelector('textarea[name="comment"]');
+                        const charCount = document.getElementById('char_count');
+                        
+                        if (commentField) {
+                            commentField.addEventListener('input', function() {
+                                charCount.textContent = this.value.length;
+                            });
+                        }
+                    </script>
                 @endif
 
             </div>

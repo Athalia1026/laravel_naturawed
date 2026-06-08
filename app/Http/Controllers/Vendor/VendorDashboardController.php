@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Vendor;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Request;
 use App\Models\Order;
 use App\Models\Package;
+use App\Models\ActivityLog;
 
 class VendorDashboardController extends Controller
 {
@@ -85,12 +87,117 @@ class VendorDashboardController extends Controller
             ->where('b.booking_status', 'pending_review') // PERBAIKAN: Gunakan kolom dan value baru
             ->count();
 
+        // F. Fetch Recent Reviews for Vendor
+       $recentReviews = DB::table('reviews as r')
+            ->join('customer_profiles as cp', 'r.customer_id', '=', 'cp.id')
+            ->where('r.vendor_id', $vendorId)
+          
+            
+            ->select(
+                'r.id', 
+                'r.rating', 
+                'r.comment', 
+                'r.vendor_reply',
+                'r.replied_at',
+                'r.created_at', 
+                'cp.full_name as customer_name'
+            )
+            ->orderBy('r.created_at', 'desc')
+            ->take(3)
+            ->get()
+            ->map(function ($review) {
+                // LOGIKA SENSOR ANONIM (MARKETPLACE STYLE)
+                $name = trim($review->customer_name);
+                $length = strlen($name);
+                
+                if ($length > 2) {
+                    $first = substr($name, 0, 1);
+                    $last = substr($name, -1);
+                    $review->masked_name = $first . '***' . $last;
+                } else {
+                    $review->masked_name = 'A***'; // Fallback jika nama terlalu pendek
+                }
+                
+                return $review;
+            });
+
         // Lempar data ke file views
         return view('vendor.dashboard', compact(
             'recentOrders',
             'totalOrdersCount',
             'activePackagesCount',
-            'newInquiriesCount'
+            'newInquiriesCount',
+            'recentReviews',
+            'vendorProfile'
         ));
+    }
+    /**
+     * Store vendor reply to a customer review
+     */
+public function reply(Request $request, $reviewId)
+    {
+        // Validation
+        $request->validate([
+            'vendor_reply' => 'required|string|max:1000',
+        ]);
+
+        // 🌿 ACID IMPLEMENTATION: Memulai transaksi database sebelum operasi baca/tulis krusial
+        DB::beginTransaction();
+
+        try {
+            $userId = Auth::id();
+
+            // Get vendor profile
+            $vendorProfile = DB::table('vendor_profiles')
+                ->where('user_id', $userId)
+                ->first();
+
+            if (!$vendorProfile) {
+                // Batalkan transaksi jika profil tidak ditemukan sebelum melakukan lock/commit
+                DB::rollBack();
+                return redirect()->back()->with('error', 'Vendor profile not found.');
+            }
+
+            // Get review and verify it belongs to this vendor
+            $review = DB::table('reviews')
+                ->where('id', $reviewId)
+                ->where('vendor_id', $vendorProfile->id)
+                ->first();
+
+            if (!$review) {
+                DB::rollBack();
+                return redirect()->back()->with('error', 'Review not found or does not belong to you.');
+            }
+
+            // Update review with vendor reply
+            DB::table('reviews')
+                ->where('id', $reviewId)
+                ->update([
+                    'vendor_reply' => $request->vendor_reply,
+                    'replied_at' => now(),
+                ]);
+                
+                ActivityLog::create([
+                'user_id'    => $userId,
+                'activity'   => 'Vendor replied to customer review.',
+                'table_name' => 'reviews',
+                'record_id'  => $reviewId,
+                'details'    => json_encode([
+                    'review_rating' => $review->rating ?? 'No rating data',
+                    'reply_preview' => \Illuminate\Support\Str::limit($request->vendor_reply, 50)
+                ]),
+                'ip_address' => $request->ip()
+            ]);
+
+            // Jika update ulasan DAN pengisian log sukses, kunci data secara permanen
+            DB::commit();
+
+            return redirect()->back()->with('success', 'Your reply has been posted successfully!');
+
+        } catch (\Exception $e) {
+            // Jika salah satu proses di atas meledak/eror, kembalikan status database ke kondisi semula
+            DB::rollBack();
+            return redirect()->back()->with('error', 'An error occurred: ' . $e->getMessage());
+        }
     }
 }

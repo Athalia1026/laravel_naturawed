@@ -31,21 +31,55 @@
                     </div>
                 @endif
 
-                <div class="mb-8 flex items-center gap-6">
-                    <div class="w-24 h-24 rounded-full bg-gray-200 overflow-hidden border-4 border-white shadow-lg relative group cursor-pointer">
-                        <img src="https://picsum.photos/seed/vendor/200/200" alt="Studio Logo" class="w-full h-full object-cover">
-                        <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                            <i data-lucide="camera" class="w-6 h-6 text-white"></i>
+                <form action="{{ route('profile.update') }}" method="POST" enctype="multipart/form-data" class="bg-white rounded-[2rem] p-10 shadow-sm border border-gray-50 space-y-6">
+                    @csrf
+                    
+                    <div class="mb-8 flex items-center gap-6">
+                        <div class="relative group">
+                            <label for="profile_image_input" class="w-24 h-24 rounded-full bg-gray-200 overflow-hidden border-4 border-white shadow-lg relative group cursor-pointer flex items-center justify-center">
+                                @if ($vendorProfile && $vendorProfile->profile_image)
+                                    <img id="avatar_preview" src="{{ asset($vendorProfile->profile_image) }}" alt="Studio Logo" class="w-full h-full object-cover">
+                                @else
+                                    <img id="avatar_preview" src="https://picsum.photos/seed/vendor/200/200" alt="Studio Logo" class="w-full h-full object-cover">
+                                @endif
+                                <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <i data-lucide="camera" class="w-6 h-6 text-white"></i>
+                                </div>
+                            </label>
+                            <input type="file" id="profile_image_input" name="profile_image" accept="image/jpeg,image/png,image/jpg,image/webp" class="hidden">
+                        </div>
+                        <div>
+                            <h3 class="text-3xl font-serif text-[#2d3e2d] mb-1">Studio Branding</h3>
+                            <p class="text-gray-500 text-sm">Update your public identity and contact information.</p>
                         </div>
                     </div>
-                    <div>
-                        <h3 class="text-3xl font-serif text-[#2d3e2d] mb-1">Studio Branding</h3>
-                        <p class="text-gray-500 text-sm">Update your public identity and contact information.</p>
-                    </div>
-                </div>
 
-                <form action="{{ route('profile.update') }}" method="POST" class="bg-white rounded-[2rem] p-10 shadow-sm border border-gray-50 space-y-6">
-                    @csrf <div class="grid grid-cols-2 gap-6">
+                    <div class="grid grid-cols-2 gap-6">
+                        
+                        {{-- ==================== 🌿 BARU: COVER BACKGROUND BANNER SHOWCASE ==================== --}}
+                        <div class="col-span-2">
+                            <label class="block text-[10px] font-bold tracking-widest text-gray-400 uppercase mb-2">Hero Cover Background Banner</label>
+                            <div class="relative h-48 w-full rounded-2xl overflow-hidden bg-gray-100 border-2 border-dashed border-gray-200 hover:border-[#2d3e2d] transition-all group flex flex-col items-center justify-center text-center cursor-pointer">
+                                <label for="cover_image_input" class="absolute inset-0 z-10 cursor-pointer"></label>
+                                <input type="file" id="cover_image_input" name="cover_image" accept="image/jpeg,image/png,image/jpg,image/webp" class="hidden">
+                                
+                                @if ($vendorProfile && $vendorProfile->cover_image)
+                                    <img id="cover_preview" src="{{ asset($vendorProfile->cover_image) }}" class="absolute inset-0 w-full h-full object-cover">
+                                    <div class="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors z-0"></div>
+                                @else
+                                    <img id="cover_preview" class="absolute inset-0 w-full h-full object-cover hidden">
+                                    <div class="absolute inset-0 bg-black/10 hidden group-hover:block z-0"></div>
+                                @endif
+
+                                <div id="cover_content_wrapper" class="relative z-10 text-zinc-400 group-hover:text-white transition-colors p-4">
+                                    <i data-lucide="image-plus" class="w-8 h-8 mb-2 mx-auto opacity-70"></i>
+                                    <span class="text-xs font-semibold block mb-1">Click to change cover background banner</span>
+                                    <span class="text-[10px] opacity-60 block">Recommended landscape format (min. 1920x1080px, max 3MB)</span>
+                                </div>
+                            </div>
+                        </div>
+                        {{-- ============================================================================== --}}
+
                         <div class="col-span-2 md:col-span-1">
                             <label class="block text-[10px] font-bold tracking-widest text-gray-400 uppercase mb-2">Studio / Business Name</label>
                             <input type="text" name="business_name" value="{{ old('business_name', Auth::user()->name) }}" required
@@ -63,6 +97,68 @@
                             <input type="text" name="address" value="{{ old('address', $vendorProfile->address ?? '') }}" placeholder="e.g., 123 Botanical Ave, Jakarta" required
                                    class="w-full bg-[#f0f2f0] border-transparent rounded-xl px-4 py-3 text-sm focus:border-[#2d3e2d] focus:bg-white outline-none transition-all">
                         </div>
+
+                        <div class="col-span-2 md:col-span-1">
+                            <label class="block text-[10px] font-bold tracking-widest text-gray-400 uppercase mb-2">Instagram Username</label>
+                            <div class="relative flex items-center w-full">
+                                <span class="absolute left-4 text-sm font-medium text-gray-400">@</span>
+                                <input type="text" name="instagram" value="{{ old('instagram', $vendorProfile->instagram ?? '') }}" placeholder="naturawed.studio"
+                                       class="w-full bg-[#f0f2f0] border-transparent rounded-xl pl-9 pr-4 py-3 text-sm focus:border-[#2d3e2d] focus:bg-white outline-none transition-all">
+                            </div>
+                        </div>
+
+                        <div class="col-span-2 md:col-span-1">
+                            <label class="block text-[10px] font-bold tracking-widest text-gray-400 uppercase mb-2">Website URL</label>
+                            <div class="relative flex items-center w-full">
+                                <span class="absolute left-4 text-sm font-medium text-gray-400"><i data-lucide="globe" class="w-4 h-4 text-gray-400"></i></span>
+                                <input type="url" name="website" value="{{ old('website', $vendorProfile->website ?? '') }}" placeholder="https://www.yourstudio.com"
+                                       class="w-full bg-[#f0f2f0] border-transparent rounded-xl pl-11 pr-4 py-3 text-sm focus:border-[#2d3e2d] focus:bg-white outline-none transition-all">
+                            </div>
+                        </div>
+
+                        <div class="col-span-2">
+                            <label class="block text-[10px] font-bold tracking-widest text-gray-400 uppercase mb-2">Studio Bio / Description</label>
+                            <textarea name="bio" placeholder="Tell us about your studio, style, and what makes you unique (max 1000 characters)..." maxlength="1000"
+                                      class="w-full bg-[#f0f2f0] border-transparent rounded-xl px-4 py-3 text-sm focus:border-[#2d3e2d] focus:bg-white outline-none transition-all resize-none h-32"
+                                      >{{ old('bio', $vendorProfile->bio ?? '') }}</textarea>
+                            <p class="text-xs text-gray-400 mt-1">
+                                <span id="char_count">{{ old('bio', $vendorProfile->bio ?? '') ? strlen(old('bio', $vendorProfile->bio ?? '')) : 0 }}</span>/1000 characters
+                            </p>
+                        </div>
+
+                        <div class="col-span-2 pt-6 mt-4 border-t border-gray-100">
+                            <h4 class="text-xl font-serif text-[#2d3e2d] mb-2">Meet the Team Showcase</h4>
+                            <p class="text-xs text-gray-500 mb-6">Upload a group photo of your creative team and provide a compelling introduction story for potential clients.</p>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
+                                <div class="md:col-span-1">
+                                    <label class="block text-[10px] font-bold tracking-widest text-gray-400 uppercase mb-2">Team Group Photograph</label>
+                                    <div class="relative aspect-[4/3] rounded-2xl overflow-hidden bg-gray-100 border-2 border-dashed border-gray-200 hover:border-[#2d3e2d] transition-all flex flex-col items-center justify-center p-2 text-center group cursor-pointer">
+                                        <label for="team_image_input" class="absolute inset-0 z-10 cursor-pointer"></label>
+                                        <input type="file" id="team_image_input" name="team_image" accept="image/*" class="hidden">
+                                        
+                                        @if ($vendorProfile && $vendorProfile->team_image)
+                                            <img id="team_preview" src="{{ asset($vendorProfile->team_image) }}" class="absolute inset-0 w-full h-full object-cover">
+                                        @else
+                                            <img id="team_preview" class="absolute inset-0 w-full h-full object-cover hidden">
+                                            <div id="team_placeholder" class="flex flex-col items-center justify-center text-zinc-400">
+                                                <i data-lucide="image" class="w-8 h-8 mb-2 opacity-60"></i>
+                                                <span class="text-xs font-medium">Select team photo</span>
+                                            </div>
+                                        @endif
+                                    </div>
+                                </div>
+
+                                <div class="md:col-span-2">
+                                    <label class="block text-[10px] font-bold tracking-widest text-gray-400 uppercase mb-2">Team Introduction / Motto</label>
+                                    <input type="text" name="team_description" value="{{ old('team_description', $vendorProfile->team_description ?? '') }}" 
+                                           placeholder="e.g., Meet our award-winning wedding directors who turn dream milestones into zero-waste realities."
+                                           class="w-full bg-[#f0f2f0] border-transparent rounded-xl px-4 py-3 text-sm focus:border-[#2d3e2d] focus:bg-white outline-none transition-all">
+                                    <p class="text-[11px] text-gray-400 mt-2 leading-relaxed">Give a brief summary outlining your collective crew's spirit or combined service excellence (max 255 characters).</p>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
 
                     <div class="flex justify-end gap-4 pt-6 mt-6 border-t border-gray-100">
@@ -81,6 +177,82 @@
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             lucide.createIcons();
+            
+            // 1. Profile Image Upload Preview Handler
+            const profileImageInput = document.getElementById('profile_image_input');
+            const avatarPreview = document.getElementById('avatar_preview');
+            
+            if (profileImageInput) {
+                profileImageInput.addEventListener('change', function(e) {
+                    const file = e.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = function(event) {
+                            avatarPreview.src = event.target.result;
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
+            }
+
+            // 2. 🌿 BARU: Live Preview Handler Gambar Cover Background Banner
+            const coverImageInput = document.getElementById('cover_image_input');
+            const coverPreview = document.getElementById('cover_preview');
+            const wrapperContent = document.getElementById('cover_content_wrapper');
+
+            if (coverImageInput) {
+                coverImageInput.addEventListener('change', function(e) {
+                    const file = e.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = function(event) {
+                            if (coverPreview) {
+                                coverPreview.src = event.target.result;
+                                coverPreview.classList.remove('hidden');
+                            }
+                            if (wrapperContent) {
+                                // Mengubah teks menjadi warna putih agar kontras di atas gambar preview kover
+                                wrapperContent.classList.add('text-white', 'bg-black/30');
+                            }
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
+            }
+
+            // 3. Live Preview Handler Gambar Foto Tim Baru
+            const teamImageInput = document.getElementById('team_image_input');
+            const teamPreview = document.getElementById('team_preview');
+            const teamPlaceholder = document.getElementById('team_placeholder');
+
+            if (teamImageInput) {
+                teamImageInput.addEventListener('change', function(e) {
+                    const file = e.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = function(event) {
+                            if (teamPreview) {
+                                teamPreview.src = event.target.result;
+                                teamPreview.classList.remove('hidden');
+                            }
+                            if (teamPlaceholder) {
+                                teamPlaceholder.classList.add('hidden');
+                            }
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
+            }
+            
+            // 4. Bio Character Counter Handler
+            const bioTextarea = document.querySelector('textarea[name="bio"]');
+            const charCount = document.getElementById('char_count');
+            
+            if (bioTextarea && charCount) {
+                bioTextarea.addEventListener('input', function() {
+                    charCount.textContent = this.value.length;
+                });
+            }
         });
     </script>
 </body>

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Customer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
+use App\Models\VendorProfile;
 
 class HomeController extends Controller
 {
@@ -13,36 +14,37 @@ class HomeController extends Controller
         $ecoPackages = DB::table('packages as p')
             ->leftJoin('vendor_profiles as vp', 'p.vendor_id', '=', 'vp.id')
             ->leftJoin('categories as c', 'p.category_id', '=', 'c.id')
+            ->join('users as u', 'vp.user_id', '=', 'u.id')
             ->where('p.status', 'active')
-            ->select('p.*', 'vp.business_name', 'c.name as category_name')
+            ->select('p.*', 'vp.business_name', 'u.name as user_name', 'c.name as category_name')
             ->orderBy('p.created_at', 'desc')
             ->take(6)
             ->get();
 
-        // 2. Data Array Static Rekomendasi Vendor (Sesuai berkas asli Anda)
-        $recommendedVendors = [
-            [
-                "id" => 1,
-                "name" => "Shoreline Studio",
-                "author" => "Anne",
-                "img" => "https://images.unsplash.com/photo-1520854221256-17451cc331bf?q=80&w=2070&auto=format&fit=crop",
-                "review" => "Great service, professional, and easy to work with."
-            ],
-            [
-                "id" => 2,
-                "name" => "Ocean Breeze",
-                "author" => "Johon",
-                "img" => "https://images.unsplash.com/photo-1510076857177-7470076d4098?q=80&w=2072&auto=format&fit=crop",
-                "review" => "Beautiful work! Truly made, Beautiful work feel, feel special."
-            ],
-            [
-                "id" => 3,
-                "name" => "Green Leaf Catering",
-                "author" => "Coterer",
-                "img" => "https://images.unsplash.com/photo-1555244162-803834f70033?q=80&w=2070&auto=format&fit=crop",
-                "review" => "Caterer, limit points, really, really caterers."
-            ]
-        ];
+       // 2. LOGIKA BARU: Mengambil 3 Vendor Terbaik dari Database
+        $recommendedVendorsData = VendorProfile::withAvg('reviews', 'rating')
+            ->with(['reviews' => function ($query) {
+                // Ambil review terakhir untuk ditampilkan sebagai testimoni
+                $query->latest(); 
+            }])
+            // Urutkan dari rating rata-rata paling tinggi
+            ->orderBy('reviews_avg_rating', 'desc')
+            ->take(3)
+            ->get();
+
+            // Memetakan data asli dari database agar strukturnya cocok dengan tampilan Blade kamu
+        $recommendedVendors = $recommendedVendorsData->map(function ($vendor) {
+            $latestReview = $vendor->reviews->first();
+            
+            return [
+                "id" => $vendor->id,
+                "name" => $vendor->business_name,
+                "author" => $latestReview ? "Verified Customer" : "NaturaWed",
+                "img" => $vendor->profile_image ? asset($vendor->profile_image) : "https://images.unsplash.com/photo-1520854221256-17451cc331bf?q=80&w=2070&auto=format&fit=crop",
+                "review" => $latestReview ? $latestReview->comment : ($vendor->bio ?? "Vendor hebat yang patut dipertimbangkan untuk hari spesialmu."),
+                "rating" => $vendor->reviews_avg_rating ? number_format($vendor->reviews_avg_rating, 1) : "5.0"
+            ];
+        });
 
         // 3. Data Array Static Wedding Deals (Sesuai berkas asli Anda)
         $weddingDeals = [

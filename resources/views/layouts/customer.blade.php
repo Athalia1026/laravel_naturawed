@@ -10,6 +10,7 @@
 
     {{-- Alpine.js WAJIB ada sebelum dipakai --}}
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
 
     <style>
         .hide-scrollbar::-webkit-scrollbar { display: none; }
@@ -48,7 +49,7 @@
                     </a>
 
                     {{-- Inspiration --}}
-                    <a href=""
+                    <a href="{{ route('customer.inspiration') }}"
                         class="text-[11px] tracking-[0.15em] uppercase transition-colors
                         {{ Route::is('inspiration') || Route::is('inspiration.*')
                             ? 'relative font-bold text-[#2d4a22] after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:w-full after:bg-[#2d4a22] pb-1'
@@ -57,9 +58,9 @@
                     </a>
 
                     {{-- About --}}
-                    <a href=""
+                    <a href="{{ route('customer.about') }}"
                         class="text-[11px] tracking-[0.15em] uppercase transition-colors
-                        {{ Route::is('about') || Route::is('about.*')
+                        {{ Route::is('customer.about') || Route::is('customer.about.*')
                             ? 'relative font-bold text-[#2d4a22] after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:w-full after:bg-[#2d4a22] pb-1'
                             : 'font-semibold text-zinc-400 hover:text-[#2d4a22]' }}">
                         About
@@ -69,21 +70,94 @@
 
             <div class="flex items-center space-x-6 text-zinc-400">
 
-                {{-- Notification --}}
+           {{-- Notification --}}
                 @auth
-                    <a href="#" class="hover:text-[#2d4a22] transition-colors">
+                    @php
+                        // Cek notifikasi: Booking yang di-approve atau di-reject
+                        $unreadNotifications = collect();
+                        if(Auth::user()->role === 'customer') {
+                            $customerProfile = \Illuminate\Support\Facades\DB::table('customer_profiles')->where('user_id', Auth::id())->first();
+                            if($customerProfile) {
+                                $unreadNotifications = \Illuminate\Support\Facades\DB::table('bookings as b')
+                                    ->join('packages as p', 'b.package_id', '=', 'p.id')
+                                    ->where('b.customer_id', $customerProfile->id)
+                                    // KUNCI: Tarik kedua status menggunakan whereIn
+                                    ->whereIn('b.booking_status', ['approved', 'rejected']) 
+                                    ->where('b.payment_status', 'unpaid')
+                                    // KUNCI: Tambahkan b.booking_status agar UI tahu ini approved atau rejected
+                                    ->select('b.id', 'p.package_name', 'b.booking_status', 'b.updated_at') 
+                                    ->orderBy('b.updated_at', 'desc')
+                                    ->take(5) // Batasi hanya 5 notifikasi terbaru agar UI tidak penuh
+                                    ->get();
+                            }
+                        }
+                    @endphp
+
+                    <div class="relative flex items-center" x-data="{ showNotif: false }">
+                        <button @click="showNotif = !showNotif" @click.away="showNotif = false" class="hover:text-[#2d4a22] transition-colors relative bg-transparent border-none p-0 outline-none cursor-pointer">
+                            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                                <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
+                            </svg>
+                            
+                            @if(count($unreadNotifications) > 0)
+                                <span class="absolute -top-1 -right-1 flex h-3 w-3">
+                                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                                    <span class="relative inline-flex rounded-full h-3 w-3 bg-red-500 border-2 border-white"></span>
+                                </span>
+                            @endif
+                        </button>
+
+                        <div x-show="showNotif" x-cloak x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 translate-y-2" class="absolute right-0 top-full mt-4 w-80 bg-white rounded-2xl shadow-2xl border border-zinc-100 overflow-hidden z-50">
+                            <div class="p-4 border-b border-zinc-50 bg-zinc-50/80 backdrop-blur-sm">
+                                <h3 class="text-[10px] font-bold tracking-widest uppercase text-gray-400">Recent Updates</h3>
+                            </div>
+                            <div class="max-h-80 overflow-y-auto">
+                                @forelse($unreadNotifications as $notif)
+                                    <a href="{{ route('customer.bookings.history') }}" class="block p-5 border-b border-zinc-50 hover:bg-zinc-50 transition-colors decoration-none">
+                                        <div class="flex items-start gap-3">
+                                            
+                                            @if($notif->booking_status === 'approved')
+                                                <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center shrink-0 mt-0.5">
+                                                    <i data-lucide="check-circle" class="w-4 h-4 text-[#2d4a22]"></i>
+                                                </div>
+                                                <div>
+                                                    <p class="text-xs text-[#2d4a22] font-bold mb-1">Booking Approved! 🎉</p>
+                                                    <p class="text-sm text-gray-600 leading-snug">The vendor accepted your booking for <span class="font-semibold text-gray-900">{{ $notif->package_name }}</span>. Please complete your payment.</p>
+                                                    <p class="text-[10px] text-gray-400 mt-2 font-mono font-semibold uppercase">{{ \Carbon\Carbon::parse($notif->updated_at)->diffForHumans() }}</p>
+                                                </div>
+                                                
+                                            @elseif($notif->booking_status === 'rejected')
+                                                <div class="w-8 h-8 rounded-full bg-red-50 flex items-center justify-center shrink-0 mt-0.5 border border-red-100">
+                                                    <i data-lucide="x-circle" class="w-4 h-4 text-red-500"></i>
+                                                </div>
+                                                <div>
+                                                    <p class="text-xs text-red-500 font-bold mb-1">Booking Declined</p>
+                                                    <p class="text-sm text-gray-600 leading-snug">Unfortunately, the vendor cannot accept your booking for <span class="font-semibold text-gray-900">{{ $notif->package_name }}</span> at this time.</p>
+                                                    <p class="text-[10px] text-gray-400 mt-2 font-mono font-semibold uppercase">{{ \Carbon\Carbon::parse($notif->updated_at)->diffForHumans() }}</p>
+                                                </div>
+                                            @endif
+
+                                        </div>
+                                    </a>
+                                @empty
+                                    <div class="p-10 text-center flex flex-col items-center justify-center">
+                                        <div class="w-12 h-12 rounded-full bg-zinc-50 flex items-center justify-center mb-3">
+                                            <i data-lucide="bell-off" class="w-5 h-5 text-gray-300"></i>
+                                        </div>
+                                        <p class="text-sm text-gray-400 italic">You're all caught up!</p>
+                                    </div>
+                                @endforelse
+                            </div>
+                        </div>
+                    </div>
                 @else
-                    <button type="button" @click="showAuthModal = true" class="hover:text-[#2d4a22] transition-colors bg-transparent border-none p-0 outline-none cursor-pointer">
-                @endauth
+                    <button type="button" @click="showAuthModal = true" class="hover:text-[#2d4a22] transition-colors bg-transparent border-none p-0 outline-none cursor-pointer flex items-center">
                         <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                             <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
                         </svg>
-                @auth
-                    </a>
-                @else
                     </button>
                 @endauth
-
+                
                 {{-- Bookmark --}}
                 @auth
                     <a href="#" class="hover:text-[#2d4a22] transition-colors">
@@ -100,17 +174,39 @@
                 @endauth
 
                 {{-- Chat --}}
+               {{-- Chat --}}
                 @auth
-                    <a href="#" class="hover:text-[#2d4a22] transition-colors">
-                @else
-                    <button type="button" @click="showAuthModal = true" class="hover:text-[#2d4a22] transition-colors bg-transparent border-none p-0 outline-none cursor-pointer">
-                @endauth
+                    @php
+                        // Hitung pesan chat yang belum dibaca untuk Customer
+                        $unreadChatCount = \Illuminate\Support\Facades\DB::table('messages')
+                            ->join('conversations', 'messages.conversation_id', '=', 'conversations.id')
+                            ->where(function($q) {
+                                $q->where('conversations.user_one', Auth::id())
+                                  ->orWhere('conversations.user_two', Auth::id());
+                            })
+                            ->where('messages.sender_id', '!=', Auth::id())
+                            ->whereNull('messages.read_at')
+                            ->count();
+                    @endphp
+
+                    <a href="{{ route('chat.index') }}" class="relative hover:text-[#2d4a22] transition-colors flex items-center justify-center">
                         <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
                         </svg>
-                @auth
+                        
+                        {{-- Indikator Red Dot Animasi Ping untuk Chat --}}
+                        @if($unreadChatCount > 0)
+                            <span class="absolute -top-1.5 -right-2 flex h-3 w-3">
+                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                                <span class="relative inline-flex rounded-full h-3 w-3 bg-red-500 border-2 border-white"></span>
+                            </span>
+                        @endif
                     </a>
                 @else
+                    <button type="button" @click="showAuthModal = true" class="hover:text-[#2d4a22] transition-colors bg-transparent border-none p-0 outline-none cursor-pointer">
+                        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                        </svg>
                     </button>
                 @endauth
 

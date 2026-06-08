@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Http\Controllers\Customer\BookingController;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -39,7 +40,7 @@ class Payment extends Model
      */
     public function booking(): BelongsTo
     {
-        return $this->belongsTo(Booking::class, 'booking_id');
+        return $this->belongsTo(BookingController::class, 'booking_id');
     }
 
     // =========================================================================

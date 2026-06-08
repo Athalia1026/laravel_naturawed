@@ -11,9 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('bookings', function (Blueprint $table) {
-            $table->integer('estimated_guests')->nullable()->after('event_location');
-        });
+        // 🌿 PROTEKSI ACID: Hanya tambah kolom jika kolom tersebut BELUM ada di database
+        if (!Schema::hasColumn('bookings', 'estimated_guests')) {
+            Schema::table('bookings', function (Blueprint $table) {
+                $table->integer('estimated_guests')->nullable()->after('event_location');
+            });
+        }
     }
 
     /**
@@ -21,8 +24,11 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('bookings', function (Blueprint $table) {
-            $table->dropColumn('estimated_guests');
-        });
+        // 🌿 PROTEKSI ACID: Hanya hapus jika kolom tersebut MEMANG ada di database
+        if (Schema::hasColumn('bookings', 'estimated_guests')) {
+            Schema::table('bookings', function (Blueprint $table) {
+                $table->dropColumn('estimated_guests');
+            });
+        }
     }
 };
