@@ -250,7 +250,7 @@
                                             </div>
 
                                             {{-- Form Hapus --}}
-                                            <form action="{{ route('vendor.packages.delete', $pkg->id) }}" method="POST"
+                                            <form action="{{ route('vendor.packages.destroy', $pkg->id) }}" method="POST"
                                                 onsubmit="return confirm('Apakah Anda yakin ingin menghapus paket pernikahan ini?');"
                                                 class="m-0 p-0">
                                                 @csrf

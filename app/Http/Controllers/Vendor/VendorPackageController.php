@@ -217,7 +217,7 @@ class VendorPackageController extends Controller
     /**
      * HAPUS PAKET (DELETE)
      */
-    public function delete(Request $request, $id) // Ditambahkan objek Request untuk mendeteksi IP Log
+public function destroy(Request $request, $id) 
     {
         $userId = Auth::id();
         $package = DB::table('packages')->where('id', $id)->first();
@@ -226,7 +226,7 @@ class VendorPackageController extends Controller
             return redirect()->route('vendor.packages.index')->with('error', 'Package not found.');
         }
 
-        // 🌿 ACID IMPLEMENTATION: Memulai transaksi database
+        // transaksi database
         DB::beginTransaction();
 
         try {
@@ -240,13 +240,10 @@ class VendorPackageController extends Controller
                 'ip_address' => $request->ip()
             ]);
 
-            // 2. Eksekusi hapus data dari tabel packages
             DB::table('packages')->where('id', $id)->delete();
 
-            // Kunci transaksi database
             DB::commit();
 
-            // 3. Setelah DB aman terhapus, bersihkan file fisik gambar dari local storage Laragon
             if ($package->main_image) {
                 $oldPath = str_replace('/storage/', '', $package->main_image);
                 Storage::disk('public')->delete($oldPath);
@@ -255,7 +252,6 @@ class VendorPackageController extends Controller
             return redirect()->route('vendor.packages.index')->with('success', 'Package deleted successfully!');
 
         } catch (\Exception $e) {
-            // Batalkan penghapusan di database jika log gagal tersimpan
             DB::rollBack();
             return redirect()->route('vendor.packages.index')->with('error', 'Failed to delete package: ' . $e->getMessage());
         }
