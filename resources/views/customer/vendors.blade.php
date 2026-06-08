@@ -19,7 +19,7 @@
             <div class="flex flex-col md:flex-row gap-4 items-center justify-between">
 
                 <div class="relative w-full md:w-96">
-                    <input type="text" id="katalogSearch" placeholder="Search package or vendor name..."
+                    <input type="text" name="search" id="katalogSearch" placeholder="Search package or vendor name..." value="{{ request()->query('search') }}"
                         class="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-[#2d4a22] focus:outline-none transition-all">
                     <span class="absolute left-3 top-3.5 text-gray-400">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

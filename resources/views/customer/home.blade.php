@@ -11,12 +11,13 @@
             referrerpolicy="no-referrer"
         />
         <div class="absolute inset-0 flex items-center justify-center">
-            <form action="#" method="GET" class="relative flex w-full max-w-3xl items-center px-6">
+            <form action="{{ route('customer.vendors') }}" method="GET" class="relative flex w-full max-w-3xl items-center px-6">
                 <input
                     type="text"
-                    name="q"
+                    name="search"
                     placeholder="Find your eco-friendly wedding vendors"
                     class="h-16 w-full rounded-full bg-white pl-10 pr-40 text-lg shadow-2xl focus:outline-none"
+                    value="{{ request()->query('search') }}"
                 />
                 <button
                     type="submit"
