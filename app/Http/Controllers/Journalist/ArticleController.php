@@ -102,12 +102,122 @@ class ArticleController extends Controller
         }
     }
 
+    public function edit($id) 
+    {
+        $article = Article::findOrFail($id);
+
+        // Keamanan: Pastikan jurnalis hanya bisa mengedit artikel miliknya sendiri
+        if ($article->journalist_id !== Auth::id()) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        return view('journalist.edit_article', compact('article'));
+    }
+
+    // ==========================================
+    // FUNGSI UPDATE ARTIKEL
+    // ==========================================
+    public function update(Request $request, $id) 
+    {
+        $article = Article::findOrFail($id);
+
+        if ($article->journalist_id !== Auth::id()) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $request->validate([
+            'title'       => 'required|string|max:255',
+            'author'      => 'required|string|max:100',
+            'category'    => 'required|string|max:50',
+            'content'     => 'required|string',
+            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048', // Nullable karena gambar tidak wajib diganti
+        ]);
+
+        DB::beginTransaction();
+
+        try {
+            $imageUrl = $article->image_url; // Default gunakan URL gambar lama
+            $newImagePath = null;
+
+            // Jika jurnalis mengunggah gambar baru
+            if ($request->hasFile('cover_image')) {
+                // 1. Hapus gambar lama dari storage server jika ada
+                if ($article->image_url) {
+                    $oldPath = str_replace('/storage/', '', $article->image_url);
+                    if (Storage::disk('public')->exists($oldPath)) {
+                        Storage::disk('public')->delete($oldPath);
+                    }
+                }
+
+                // 2. Simpan gambar baru
+                $newImagePath = $request->file('cover_image')->store('articles', 'public');
+                $imageUrl = '/storage/' . $newImagePath;
+            }
+
+            // Update data ke database
+            $article->update([
+                'title'       => $request->title,
+                'author_name' => $request->author,
+                'category'    => $request->category,
+                'image_url'   => $imageUrl,
+                'content'     => $request->content,
+            ]);
+
+            DB::commit();
+            return redirect()->route('journalist.dashboard')->with('success', 'Artikel berhasil diperbarui!');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            
+            // Hapus gambar baru jika database gagal diupdate
+            if ($newImagePath && Storage::disk('public')->exists($newImagePath)) {
+                Storage::disk('public')->delete($newImagePath);
+            }
+            
+            return back()->with('error', 'Terjadi kesalahan saat mengupdate: ' . $e->getMessage())->withInput();
+        }
+    }
+
+    // ==========================================
+    // FUNGSI DELETE ARTIKEL
+    // ==========================================
+    public function destroy($id) 
+    {
+        $article = Article::findOrFail($id);
+
+        if ($article->journalist_id !== Auth::id()) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        DB::beginTransaction();
+
+        try {
+            // 1. Hapus gambar dari server sebelum menghapus data di database
+            if ($article->image_url) {
+                $oldPath = str_replace('/storage/', '', $article->image_url);
+                if (Storage::disk('public')->exists($oldPath)) {
+                    Storage::disk('public')->delete($oldPath);
+                }
+            }
+
+            // 2. Hapus data dari database
+            $article->delete();
+
+            DB::commit();
+            return redirect()->route('journalist.dashboard')->with('success', 'Artikel berhasil dihapus!');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Terjadi kesalahan saat menghapus artikel: ' . $e->getMessage());
+        }
+    }
+
     public function authorProfile($id)
-{
-    $author = \App\Models\User::with('journalistProfile')->findOrFail($id);
-    $articles = \App\Models\Article::where('journalist_id', $id)->latest()->get();
-    
-    return view('customer.author_profile', compact('author', 'articles'));
-}
+    {
+        $author = \App\Models\User::with('journalistProfile')->findOrFail($id);
+        $articles = \App\Models\Article::where('journalist_id', $id)->latest()->get();
+        
+        return view('customer.author_profile', compact('author', 'articles'));
+    }
     
 }

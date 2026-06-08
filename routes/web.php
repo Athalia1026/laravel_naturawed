@@ -83,6 +83,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/journalist/article/create', [ArticleController::class, 'create'])->name('journalist.article.create');
     Route::post('/journalist/article/store', [ArticleController::class, 'store'])->name('journalist.article.store');
     
+    Route::get('/journalist/article/{id}/edit', [ArticleController::class, 'edit'])->name('journalist.article.edit');
+    Route::post('/journalist/article/{id}/update', [ArticleController::class, 'update'])->name('journalist.article.update');
+    Route::delete('/journalist/article/{id}', [ArticleController::class, 'destroy'])->name('journalist.article.destroy');
+
     // Jurnalis Profile Management
     Route::get('/journalist/profile', [JournalistProfileController::class, 'show'])->name('journalist.profile.show');
     Route::get('/journalist/profile/edit', [JournalistProfileController::class, 'edit'])->name('journalist.profile.edit');
