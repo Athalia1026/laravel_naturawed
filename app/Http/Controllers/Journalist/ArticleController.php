@@ -28,6 +28,13 @@ class ArticleController extends Controller
 
         return view('customer.inspiration', compact('featuredArticle', 'otherArticles'));
     }
+
+    public function index() 
+    {
+        // Redirect ke halaman inspiration sebagai default jika ada yang mengakses /articles
+        return redirect()->route('inspiration');
+    }
+
     // Untuk Jurnalis
     public function dashboard() {
         $myArticles = Article::where('journalist_id', Auth::id())->get();
@@ -47,61 +54,52 @@ class ArticleController extends Controller
 
     public function store(Request $request) 
     {
-       
+        // 1. Validasi
         $request->validate([
             'title'       => 'required|string|max:255',
             'author'      => 'required|string|max:100',
             'category'    => 'required|string|max:50',
             'content'     => 'required|string',
-            'cover_image' => 'required|image|mimes:jpeg,png,jpg,webp|max:2048', // Maksimal 2MB
+            'cover_image' => 'required|image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
-        
         
         $imageUrl = null;
+        $imagePath = null;
+
+        // 2. Upload Gambar
         if ($request->hasFile('cover_image')) {
-            // Simpan gambar ke folder storage/app/public/articles
             $imagePath = $request->file('cover_image')->store('articles', 'public');
-            // Format URL agar bisa diakses dari public
             $imageUrl = '/storage/' . $imagePath;
         }
-        
-         DB::beginTransaction(); // Kunci database, mulai proses transaksi
+
+        // 3. Database Transaction (ACID)
+        DB::beginTransaction(); 
 
         try {
-         
+            Article::create([
+                'journalist_id' => Auth::id(),
+                'title'         => $request->title,
+                'author_name'   => $request->author,
+                'category'      => $request->category,
+                'image_url'     => $imageUrl,
+                'content'       => $request->content,
+            ]);
 
-        // 3. Simpan data ke database
-        Article::create([
-            'journalist_id' => Auth::id(),
-            'title'         => $request->title,
-            'author_name'   => $request->author,
-            'category'      => $request->category,
-            'image_url'     => $imageUrl,
-            'content'       => $request->content,
-        ]);
-
-            // Jika eksekusi berhasil sampai sini, permanenkan data ke database! (DURABILITY)
-            DB::commit();
+            DB::commit(); // Permanenkan data
 
             return redirect()->route('journalist.dashboard')
                              ->with('success', 'Artikel inspirasi berhasil dipublikasikan!');
 
         } catch (\Exception $e) {
-           
-            DB::rollBack();
-
-           
-            if ($imagePath) {
+            DB::rollBack(); // Batalkan data jika gagal
+            
+            // Hapus gambar yang terlanjur ter-upload jika database gagal
+            if ($imagePath && Storage::disk('public')->exists($imagePath)) {
                 Storage::disk('public')->delete($imagePath);
             }
-
-            // Kembalikan ke halaman form dengan pesan error
-            return back()->with('error', 'Terjadi kesalahan saat menyimpan data: ' . $e->getMessage())->withInput();
+            
+            return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage())->withInput();
         }
-        // 4. Kembali ke dashboard dengan pesan sukses
-        return redirect()->route('journalist.dashboard')->with('success', 'Article published successfully!');
-
-        
     }
     
 }
