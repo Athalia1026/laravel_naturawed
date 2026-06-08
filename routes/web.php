@@ -53,7 +53,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/vendor/packages/store', [VendorPackageController::class, 'store'])->name('vendor.packages.store');
     Route::get('/vendor/packages/{id}/edit', [VendorPackageController::class, 'edit'])->name('vendor.packages.edit');
     Route::post('/vendor/packages/update', [VendorPackageController::class, 'update'])->name('vendor.packages.update');
-    Route::delete('/vendor/packages/{id}', [VendorPackageController::class, 'delete'])->name('vendor.packages.delete');
+
+        
+    Route::delete('/vendor/packages/{id}', [VendorPackageController::class, 'destroy'])->name('vendor.packages.destroy');
 
     Route::get('/vendor/bookings', [VendorBookingController::class, 'index'])->name('vendor.bookings.index');
 

@@ -76,10 +76,12 @@
                         <div class="p-6 flex items-start justify-between flex-1">
                             <div class="pr-4">
                                 <h3 class="text-xl font-serif text-gray-900 mb-1.5 leading-tight line-clamp-2">
-                                    {{ $pkg->package_name }}</h3>
+                                    {{ $pkg->package_name }}
+                                </h3>
                                 <p class="text-[10px] font-bold tracking-widest text-gray-400 uppercase">
                                     {{ $pkg->category_name ?? 'Uncategorized' }} • IDR
-                                    {{ number_format((float) $pkg->price, 0, ',', '.') }}</p>
+                                    {{ number_format((float) $pkg->price, 0, ',', '.') }}
+                                </p>
                             </div>
 
                             <div class="relative" onclick="this.querySelector('.dropdown-menu').classList.toggle('hidden')">
@@ -94,11 +96,19 @@
                                         class="flex items-center gap-3 px-4 py-2.5 text-xs font-bold text-gray-700 hover:bg-gray-50 hover:text-[#2d4a22] transition-colors">
                                         <i data-lucide="edit-3" class="w-4 h-4"></i> Edit
                                     </a>
-                                    <a href="{{ route('vendor.packages.delete', ['id' => $pkg->id]) }}"
-                                        onclick="return confirm('Yakin ingin menghapus paket ini secara permanen?')"
-                                        class="flex items-center gap-3 px-4 py-2.5 text-xs font-bold text-red-600 hover:bg-red-50 transition-colors">
+                                    {{-- KODE BARU YANG BERHASIL (PERTAHANKAN YANG INI) --}}
+                                    <button type="button"
+                                        onclick="if(confirm('Yakin ingin menghapus paket ini secara permanen?')) { document.getElementById('delete-form-{{ $pkg->id }}').submit(); }"
+                                        class="w-full flex items-center gap-3 px-4 py-2.5 text-xs font-bold text-red-600 hover:bg-red-50 transition-colors text-left">
                                         <i data-lucide="trash-2" class="w-4 h-4"></i> Delete
-                                    </a>
+                                    </button>
+
+                                    <form id="delete-form-{{ $pkg->id }}"
+                                        action="{{ route('vendor.packages.destroy', $pkg->id) }}" method="POST" class="hidden">
+                                        @csrf
+                                        @method('DELETE')
+                                    </form>
+                                    </form>
                                 </div>
                             </div>
 
@@ -125,37 +135,37 @@
     </main>
 
     <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        // Initialize Lucide Icons
-        lucide.createIcons();
-        
-        // Ambil elemen input pencarian dan semua kartu paket
-        const searchInput = document.getElementById('packageSearch');
-        const packageCards = document.querySelectorAll('.package-card');
+        document.addEventListener("DOMContentLoaded", function () {
+            // Initialize Lucide Icons
+            lucide.createIcons();
 
-        if (searchInput) {
-            searchInput.addEventListener('input', function(e) {
-                // Konversi input teks ke huruf kecil agar pencarian tidak sensitif huruf kapital
-                const searchTerm = e.target.value.toLowerCase().trim();
+            // Ambil elemen input pencarian dan semua kartu paket
+            const searchInput = document.getElementById('packageSearch');
+            const packageCards = document.querySelectorAll('.package-card');
 
-                packageCards.forEach(function(card) {
-                    // Ambil data nama dan kategori dari atribut elemen kartu
-                    const packageName = card.getAttribute('data-name');
-                    const packageCategory = card.getAttribute('data-category');
+            if (searchInput) {
+                searchInput.addEventListener('input', function (e) {
+                    // Konversi input teks ke huruf kecil agar pencarian tidak sensitif huruf kapital
+                    const searchTerm = e.target.value.toLowerCase().trim();
 
-                    // Cek apakah kata kunci pencarian ada di dalam nama atau kategori paket
-                    if (packageName.includes(searchTerm) || packageCategory.includes(searchTerm)) {
-                        // Jika cocok, tampilkan kartu (hapus kelas hidden kustom Tailwind)
-                        card.classList.remove('hidden');
-                    } else {
-                        // Jika tidak cocok, sembunyikan kartu secara instan
-                        card.classList.add('hidden');
-                    }
+                    packageCards.forEach(function (card) {
+                        // Ambil data nama dan kategori dari atribut elemen kartu
+                        const packageName = card.getAttribute('data-name');
+                        const packageCategory = card.getAttribute('data-category');
+
+                        // Cek apakah kata kunci pencarian ada di dalam nama atau kategori paket
+                        if (packageName.includes(searchTerm) || packageCategory.includes(searchTerm)) {
+                            // Jika cocok, tampilkan kartu (hapus kelas hidden kustom Tailwind)
+                            card.classList.remove('hidden');
+                        } else {
+                            // Jika tidak cocok, sembunyikan kartu secara instan
+                            card.classList.add('hidden');
+                        }
+                    });
                 });
-            });
-        }
-    });
-</script>
+            }
+        });
+    </script>
 </body>
 
 </html>
