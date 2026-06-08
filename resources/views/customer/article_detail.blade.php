@@ -46,11 +46,13 @@
                 <p>{!! nl2br(e($article->content)) !!}</p>
             </div>
 
+            {{-- AREA PROFILE AUTHOR --}}
             <a href="{{ route('customer.author.profile', $article->journalist_id) }}" class="mt-24 pt-10 border-t border-zinc-200 flex items-start space-x-6 group cursor-pointer hover:bg-zinc-50 p-6 rounded-3xl transition-all -mx-6">
                 
                 <div class="w-16 h-16 rounded-full overflow-hidden flex-shrink-0 bg-zinc-200 border-2 border-transparent group-hover:border-[#2d4a22] transition-all">
-                    <img src="{{ !empty($article->profile_image) ? asset($article->profile_image) : 'https://ui-avatars.com/api/?name='.urlencode($article->author_name).'&background=2d3e2d&color=fff' }}" 
-                         alt="Author" class="w-full h-full object-cover" />
+                    {{-- Cek apakah jurnalis memiliki foto profil di tabel journalist_profiles --}}
+                    <img src="{{ !empty($article->journalist->journalistProfile->profile_image) ? asset($article->journalist->journalistProfile->profile_image) : 'https://ui-avatars.com/api/?name='.urlencode($article->author_name).'&background=2d3e2d&color=fff' }}" 
+                        alt="Author" class="w-full h-full object-cover" />
                 </div>
                 
                 <div>

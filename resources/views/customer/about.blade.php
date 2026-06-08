@@ -34,7 +34,7 @@
                             <span>Explore Eco-Vendors</span>
                             <i data-lucide="arrow-right" class="w-4 h-4"></i>
                         </a>
-                        <a href="{{ route('customer.inspiration') }}" 
+                        <a href="{{ route('inspiration') }}" 
                            class="border border-zinc-200 text-zinc-700 bg-white hover:bg-zinc-50 px-8 py-5 rounded-2xl font-bold text-base transition-all active:scale-95 no-underline flex items-center justify-center">
                             View Visual Stories
                         </a>

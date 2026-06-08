@@ -45,7 +45,7 @@
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
             @forelse ($articles as $art)
-                <a href="{{ route('customer.article.show', $art->id) }}" class="group bg-white rounded-[1.5rem] overflow-hidden border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col">
+                <a href="{{ route('articles.show', $art->id) }}" class="group bg-white rounded-[1.5rem] overflow-hidden border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col">
                     
                     <div class="h-48 w-full overflow-hidden relative shrink-0 bg-gray-100">
                         <img src="{{ !empty($art->image_url) ? asset($art->image_url) : 'https://picsum.photos/600/400' }}" 
