@@ -100,11 +100,14 @@
         
         <div class="grid grid-cols-1 gap-8 md:grid-cols-3">
             @forelse ($recommendedVendors as $item)
-                <a href="#" class="group flex flex-col h-full overflow-hidden rounded-3xl shadow-2xl transition-transform duration-300 hover:scale-105">
+                {{-- PERBAIKAN: Mengganti "#" dengan pemanggilan route() yang mengarah ke detail vendor --}}
+                <a href="{{ route('vendor.show', $item['id']) }}" class="group flex flex-col h-full overflow-hidden rounded-3xl shadow-2xl transition-transform duration-300 hover:scale-105 decoration-none">
+                    
                     <img src="{{ $item['img'] }}" alt="{{ $item['name'] }}" class="h-64 w-full object-cover shrink-0" referrerpolicy="no-referrer" />
                     
-                    <div class="bg-[#800000] p-8 text-white flex-1 flex flex-col">
+                    <div class="bg-[#800000] p-8 text-white flex-1 flex flex-col group-hover:bg-[#600000] transition-colors">
                         <h3 class="text-2xl font-bold">{{ $item['name'] }}</h3>
+                        
                         <div class="mt-2 flex items-center space-x-1">
                             @for ($i = 0; $i < 4; $i++)
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-yellow-400">
