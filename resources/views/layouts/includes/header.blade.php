@@ -139,14 +139,19 @@
             --}}
 
             {{-- Link Chat --}}
-            <a href="{{ $isAuthenticated ? route('chat.index') : 'javascript:showAuthModal = true' }}" class="transition-colors hover:text-[#2d4a22] {{ request()->routeIs('chat.*') ? 'text-[#2d4a22]' : '' }}">
-                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-                </svg>
-            </a>
+            <a href="{{ $isAuthenticated ? route('chat.index') : 'javascript:void(0)' }}" 
+                @click="if(!{{ $isAuthenticated ? 'true' : 'false' }}) { showAuthModal = true; }"
+                class="transition-colors hover:text-[#2d4a22] {{ request()->routeIs('chat.*') ? 'text-[#2d4a22]' : '' }} flex items-center">                    
+                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                    </svg>
+                    
+                </a>
 
             {{-- Link History Booking --}}
-            <a href="{{ $isAuthenticated ? route('customer.bookings.history') : 'javascript:showAuthModal = true' }}" class="transition-colors hover:text-[#2d4a22] {{ request()->routeIs('customer.bookings.history') ? 'text-[#2d4a22]' : '' }}">
+            <a href="{{ $isAuthenticated ? route('customer.bookings.history') : 'javascript:void(0)' }}" 
+                @click="if(!{{ $isAuthenticated ? 'true' : 'false' }}) { showAuthModal = true; }"
+                class="transition-colors hover:text-[#2d4a22] {{ request()->routeIs('customer.bookings.history') ? 'text-[#2d4a22]' : '' }}">
                 <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                     <path d="M12 6v6l4 2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="9"/>
                 </svg>
@@ -165,12 +170,12 @@
                     </button>
                 </form>
             @else
-                <button type="button" @click="showAuthModal = true" class="flex items-center gap-2 text-zinc-400 hover:text-[#2d4a22] transition-colors outline-none border-none bg-transparent cursor-pointer">
+                <a href="{{ route('login') }}" class="flex items-center gap-2 text-zinc-400 hover:text-[#2d4a22] transition-colors decoration-none">
                     <span class="text-[10px] font-bold uppercase tracking-widest">Login</span>
                     <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.2" viewBox="0 0 24 24">
                         <path d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
-                </button>
+                </a>
             @endif
         </div>
     </div>
